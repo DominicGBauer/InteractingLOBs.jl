@@ -26,10 +26,6 @@ function initial_conditions_numerical(slob¹, φ_list¹, p_list¹,
     
     B = .-(source.+coupling.+rl_push)#B is s in (37)
     
-    #if kick.DoNow==true
-    #    B[kick.Position] = B[kick.Position] + kick.Amount
-    #end
-        
     φ = A \ B
     #give x such that A*x = B
     return φ, source, coupling, rl_push
@@ -186,15 +182,6 @@ function intra_time_period_simulate(slob¹, φ_list¹, p_list¹,
     φ_next²[middle] = P⁺² * φ²[middle.-1] + P⁻² * φ²[middle.+1] + P² * φ²[middle] -
         slob².nu * slob².Δt * φ²[middle] + 
         slob².Δt * net_source²[middle]
-    
-    #if (kick.DoNow)
-    #    if (kick.Position>0)
-    #        φ_next¹[kick.Position] = φ_next¹[kick.Position].+kick.Amount
-    #    else 
-    #        my_p = extract_mid_price_index(slob¹,φ¹)
-    #        φ_next¹[my_p - kick.Position] = φ_next¹[my_p - kick.Position].+kick.Amount
-    #    end
-    #end
 
     return   φ_next¹, source¹, coupling¹, rl_push¹, P⁺¹, P⁻¹, P¹,
              φ_next², source², coupling², rl_push², P⁺², P⁻², P²

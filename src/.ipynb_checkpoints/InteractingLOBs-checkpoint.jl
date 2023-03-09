@@ -25,12 +25,15 @@ include("objective_surface.jl")
 
 __version__ = "Sequential LOB"
 
+foo(x) = 2*x
+
 export SLOB,
        SourceTerm,
        InteractionTerm,
        RLPushTerm,
        parse_commandline,
        ObjectiveSurface,
-       InteractOrderBooks
+       InteractOrderBooks,
+       foo
 
 end # module

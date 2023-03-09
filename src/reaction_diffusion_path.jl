@@ -111,10 +111,11 @@ function InteractOrderBooks(slob¹::SLOB,slob²::SLOB, seed::Int=-1)#same but re
     
     recalc = slob¹.α > 0.0 
     
-    for path in 1:slob¹.num_paths
+    #for path in 1:slob¹.num_paths
+    counter = 0
+    lk = Threads.SpinLock()
+    Threads.@threads for path = 1:slob¹.num_paths
         Random.seed!(seeds[path])
-        
-        print(string(path," "))
         
         @info "path $path with seed $(seeds[path])"
         lob_densities¹[:, :, path], sources¹[:,:,path], couplings¹[:,:,path], rl_pushes¹[:,:,path],
@@ -124,6 +125,17 @@ function InteractOrderBooks(slob¹::SLOB,slob²::SLOB, seed::Int=-1)#same but re
             raw_price_paths²[:, path], sample_price_paths²[:, path], 
             P⁺s²[:, path], P⁻s²[:, path], Ps²[:, path] =
         dtrw_solver(slob¹,slob², recalc)
+        
+        lock(lk)
+        try
+            counter += 1
+            #Base.buffer_writes(string(counter," "))
+            #print(string(counter," "))
+            write(stdout,string(counter," "))
+            flush(stdout)
+        finally
+            unlock(lk)
+        end
     end
 
     return   lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, sample_price_paths¹, P⁺s¹, P⁻s¹, Ps¹,
@@ -203,4 +215,12 @@ end
 
 #     return mid_price_paths
 # end
+
+# -
+
+Base.buffer_writes(stdout)="test"
+flush(stdout)
+
+
+
 
