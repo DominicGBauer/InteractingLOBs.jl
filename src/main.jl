@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 using SequentialLOB
 
+# +
 function main(output = "stdout")
     parsed_args = parse_commandline()
     slob_model = SLOB(
@@ -20,9 +22,10 @@ function main(output = "stdout")
     else
         return slob_model(parsed_args["SEED"])
     end
-
-
+    
 end
+# -
+
 
 if "" != PROGRAM_FILE && occursin(PROGRAM_FILE, @__FILE__)
     main()

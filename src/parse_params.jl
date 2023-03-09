@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 using ArgParse
 
 function parse_commandline()

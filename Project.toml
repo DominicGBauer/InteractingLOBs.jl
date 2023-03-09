@@ -1,20 +1,20 @@
-name = "SequentialLOB"
-uuid = "e6344446-1757-11ea-03c6-8946dcd8e19e"
-authors = ["Michael Laptop <michael.j.g.za@gmail.com>"]
+name = "InteractingLOBs"
+uuid = "1931dee9-8ecc-45e4-adec-8e58a11a0d04"
+authors = ["derickdiana <derick.diana.dd@gmail.com>"]
 version = "0.1.0"
 
 [deps]
-ApproxBayes = "f5f396d3-230c-5e07-80e6-9fadf06146cc"
 ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 IOLogging = "9ee9e592-2d2d-57f4-9c4b-95048a1bc2c4"
-JLD = "4138dd39-2aa7-5051-a626-17a0bb65d9c8"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 SharedArrays = "1a1011a3-84de-559e-8e89-a11a2f7dc383"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+StylizedFacts = "ae478e41-b4b8-448a-b861-17666ff2bc90"
+TSSM = "bfe6d701-ed9d-4cef-a0fe-e108fdf3a423"
