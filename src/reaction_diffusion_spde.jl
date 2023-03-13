@@ -19,7 +19,7 @@ function initial_conditions_numerical(slob¹, φ_list¹, p_list¹,
     A[end, end-1] = 2*slob.D/(slob.Δx^2)
     
     source = [slob.source_term(xᵢ, p_0¹,p_0²,t) for xᵢ in slob.x]
-    coupling = [slob.interaction_term(xᵢ, p_0¹,p_0²,t) for xᵢ in slob.x]
+    coupling = [slob.coupling_term(xᵢ, p_0¹,p_0²,t) for xᵢ in slob.x]
     rl_push = slob¹.rl_push_term(slob¹, φ_list¹, p_list¹, 
                                  slob², φ_list², p_list², 
                                  t) 
@@ -140,13 +140,13 @@ function intra_time_period_simulate(slob¹, φ_list¹, p_list¹,
     
     #first calculate source terms:
     source¹ = [slob¹.source_term(xᵢ¹, p¹, p², t) for xᵢ¹ in slob¹.x]
-    coupling¹ = [slob¹.interaction_term(xᵢ¹, p¹, p², t) for xᵢ¹ in slob¹.x]
+    coupling¹ = [slob¹.coupling_term(xᵢ¹, p¹, p², t) for xᵢ¹ in slob¹.x]
     rl_push¹ = slob¹.rl_push_term(slob¹, φ_list¹, p_list¹, 
                                   slob², φ_list², p_list², 
                                   t) 
     
     source² = [slob².source_term(xᵢ², p², p¹, t) for xᵢ² in slob².x]
-    coupling² = [slob².interaction_term(xᵢ², p², p¹, t) for xᵢ² in slob².x]
+    coupling² = [slob².coupling_term(xᵢ², p², p¹, t) for xᵢ² in slob².x]
     rl_push² = slob².rl_push_term(slob¹, φ_list¹, p_list¹, 
                                   slob², φ_list², p_list², 
                                   t)
@@ -237,7 +237,7 @@ function dtrw_solver_no_recalc(slob¹::SLOB, slob²::SLOB)
                                                                           slob², φ², p² ,
                                                                           t, 0.0) #get initial shape given at t=1
     
-    φ²[:, t], source²[:,t], coupling¹[:,t], rl_push²[:,t] = initial_conditions_numerical(slob², φ², p² ,
+    φ²[:, t], source²[:,t], coupling²[:,t], rl_push²[:,t] = initial_conditions_numerical(slob², φ², p² ,
                                                                           slob¹, φ¹, p¹,
                                                                           t, 0.0) #get initial shape given at t=1
     

@@ -1,3 +1,4 @@
+###########################NOT CURRENTLY WORKING. USE "TestInteractingLOBs.jl" INSTEAD
 using SequentialLOB
 using Test
 

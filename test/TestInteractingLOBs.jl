@@ -55,7 +55,7 @@ a = 13.0
 b = 1
 c = 1.2 
 
-myInteractionTerm = InteractionTerm(μ, a, b, c)
+myCouplingTerm = CouplingTerm(μ, a, b, c)
 # -
 
 StartTime = 150
@@ -68,13 +68,13 @@ Amount = 5.0
 myRLPusher1 = RLPushTerm(StartTime,EndTime,Position,Amount,true)
 
 lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, σ, ν, α, 
-    mySourceTerm, myInteractionTerm, myRLPusher1)
+    mySourceTerm, myCouplingTerm, myRLPusher1)
 
 # +
 myRLPusher2 = RLPushTerm(StartTime,EndTime,Position,Amount,false)
 
 lob_model² = SLOB(num_paths, T, p₀, M, L, D, σ, ν, α, 
-    mySourceTerm, myInteractionTerm, myRLPusher2)
+    mySourceTerm, myCouplingTerm, myRLPusher2)
 # -
 
 lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, sample_price_paths¹, P⁺s¹, P⁻s¹, Ps¹, 
@@ -153,3 +153,5 @@ sample_price_paths¹[end,1] #NB problem
 test = (sample_price_paths²[3-1:end-1,:] - sample_price_paths²[3-2:end-2,:])[:]
 
 histogram(test)
+
+

@@ -16,7 +16,7 @@ using ProgressMeter
 using TSSM
 
 include("source_function.jl")
-include("interaction_function.jl")
+include("coupling_function.jl")
 include("rl_push_function.jl")
 include("reaction_diffusion_path.jl")
 include("parse_params.jl")
@@ -29,7 +29,7 @@ foo(x) = 2*x
 
 export SLOB,
        SourceTerm,
-       InteractionTerm,
+       CouplingTerm,
        RLPushTerm,
        parse_commandline,
        ObjectiveSurface,

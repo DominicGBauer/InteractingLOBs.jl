@@ -10,7 +10,7 @@ mutable struct SLOB
     nu::Float64 # Cancellation rate
     α::Float64  # Waiting time in terms of Exp(α)
     source_term::SourceTerm # Source term s(x,t)(μ,λ,p¹,p²) 
-    interaction_term::InteractionTerm # Interaction term c(x,t)(μ,λ,p¹,p²)
+    coupling_term::CouplingTerm # Interaction term c(x,t)(μ,λ,p¹,p²)
     rl_push_term::RLPushTerm
     x::Array{Float64, 1}    #
     Δx::Float64 # The grid spacing which is calculated as Δx=L/M
@@ -20,7 +20,7 @@ end
 
 function SLOB(num_paths::Int64, T::Int64, p₀::Float64,
     M::Int64, L::Real, D::Float64, σ::Float64, nu::Float64,
-    α::Float64, source_term::SourceTerm, interaction_term::InteractionTerm, rl_push_term::RLPushTerm)
+    α::Float64, source_term::SourceTerm, coupling_term::CouplingTerm, rl_push_term::RLPushTerm)
 
     x₀ = p₀ - 0.5*L
     x_m = p₀ + 0.5*L
@@ -28,7 +28,7 @@ function SLOB(num_paths::Int64, T::Int64, p₀::Float64,
     x = collect(Float64, range(x₀, stop=x_m, length=M+1)) #creates an array of the entries. So returns set of x points
     Δx = L/M
     Δt = (Δx^2) / (2.0*D)
-    return SLOB(num_paths, T, p₀, M, L, D, σ, nu, α, source_term, interaction_term, rl_push_term, x, Δx, Δt)
+    return SLOB(num_paths, T, p₀, M, L, D, σ, nu, α, source_term, coupling_term, rl_push_term, x, Δx, Δt)
 end
 
 # +

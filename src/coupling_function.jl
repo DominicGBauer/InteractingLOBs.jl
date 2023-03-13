@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-mutable struct InteractionTerm
+mutable struct CouplingTerm
     μ::Float64
     a::Float64
     b::Float64
     c::Float64
 end
 
-function (it::InteractionTerm)(x::Float64,p¹::Float64,p²::Float64,t::Int64)
+function (it::CouplingTerm)(x::Float64,p¹::Float64,p²::Float64,t::Int64)
     
     f(y)=-(it.μ*(y))*exp(-(it.μ*(y))^2) #y is a temporary variable
     g = 1+tanh(abs(p²-p¹)/it.a)*it.c
