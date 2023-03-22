@@ -8,7 +8,7 @@ using ProgressMeter
 using Statistics
 using Random
 import Random:rand
-using JLD2
+#using JLD2
 
 using InteractingLOBs
 
@@ -29,7 +29,7 @@ end
 # Configuration Arguments
 num_paths = 1
 M = 400
-T = 10000
+T = 100
 L = 200
 p₀ = 238.75
 
@@ -44,21 +44,17 @@ D = 1.0
 
 #dist = Normal(0.0,1.0)
 #dist = TDist(1)
-dist = Spl(1)
+dist = Spl(1);
 # -
 
 Δx = L / M 
-Δt = (Δx^2) / (2.0 * D)
-println(Δx)
-println(Δt)
-
-Δx/D
+Δt = (Δx^2) / (2.0 * D);
 
 # +
 λ = 1.0
 μ = 0.1 
 
-mySourceTerm = SourceTerm(λ, μ)
+mySourceTerm = SourceTerm(λ, μ);
 
 # +
 # coupling:
@@ -71,32 +67,31 @@ mySourceTerm = SourceTerm(λ, μ)
 #b = 2
 #c = 2
 
-
 #reasonable coupling: 
 a = 13.0 
 b = 1
 c = 1.2 
 
-myCouplingTerm = CouplingTerm(μ, a, b, c)
+myCouplingTerm = CouplingTerm(μ, a, b, c);
 # -
 
-StartTime = 150
-EndTime = 300
+StartTime = 15
+EndTime = 16
 Position = 0
-Amount = 5.0
+Volume = 5.0;
 # If position == -x where x>=0, then put it x above the mid price each time
 
 # +
-myRLPusher1 = RLPushTerm(StartTime,EndTime,Position,Amount,false)
+myRLPusher1 = RLPushTerm(StartTime,EndTime,Position,Volume,true)
 
 lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, σ, ν, α, dist, 
-    mySourceTerm, myCouplingTerm, myRLPusher1)
+    mySourceTerm, myCouplingTerm, myRLPusher1);
 
 # +
-myRLPusher2 = RLPushTerm(StartTime,EndTime,Position,Amount,false)
+myRLPusher2 = RLPushTerm(StartTime,EndTime,Position,Volume,false)
 
 lob_model² = SLOB(num_paths, T, p₀, M, L, D, σ, ν, α, dist,
-    mySourceTerm, myCouplingTerm, myRLPusher2)
+    mySourceTerm, myCouplingTerm, myRLPusher2);
 # -
 
 lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, sample_price_paths¹, P⁺s¹, P⁻s¹, Ps¹, 
@@ -104,13 +99,8 @@ lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_
 InteractOrderBooks(lob_model¹,lob_model², -1, true) ;
 
 # +
-# save_object("OneRun.jld2",(lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, sample_price_paths¹, P⁺s¹, P⁻s¹, Ps¹, 
-# lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_price_paths², P⁺s², P⁻s², Ps²))
-# temp = load_object("OneRun.jld2")
-
-# +
 total_length = length(sample_price_paths¹[:,1]) #consists of T/Δt times
-total_steps = 200
+total_steps = 100
 step = floor(Int,total_length/total_steps)
 
 # the below just ensure we see the full graph (100-myp)% of the time
@@ -173,21 +163,36 @@ end
 gif(anim, "/tmp/LOB.gif", fps=10)
 #gif(anim, "~/Desktop/Masters/GoodPics/x.gif", fps=8)
 #gif(anim, "~/Desktop/Masters/GoodPics/LotsOfStuff.gif", fps=16)
+# -
 
-# +
-# combine all different paths into one large vector
-#diff(log.(sample_price_paths¹[1:end-1,:]),dims=1)[:]
-
-# +
 observed_price_path = sample_price_paths¹[1:end-1,1];
 observed_log_returns = diff(log.(observed_price_path[:,1]));
 
-#observed_summary_stats = get_summary_stats(observed_log_returns) #is in AdaptiveABC
-# -
-
 data_stylized_facts = StylizedFacts.StylizedFactsPlot(observed_price_path);
 
-StylizedFacts.plot_all_stylized_facts(data_stylized_facts)
+StylizedFacts.plot_all_stylized_facts(data_stylized_facts,(1000,1200))
+
+plot_price_impact(observed_price_path, StartTime, Volume)
+
+Revise.revise()
+
+# +
+for Volume in 1:100
+    myRLPusher1 = RLPushTerm(StartTime,EndTime,Position,Volume,true)
+
+    lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, σ, ν, α, dist,
+        mySourceTerm, myCouplingTerm, myRLPusher1);
+    
+    lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, sample_price_paths¹, P⁺s¹, P⁻s¹, Ps¹, 
+    lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_price_paths², P⁺s², P⁻s², Ps² =
+    InteractOrderBooks(lob_model¹,lob_model², -1, true) ;
+    
+    sample_price_paths¹[StartTime,1]
+    
+end
+# -
+
+
 
 # +
 #sample_price_paths¹[end,1] #NB problem
@@ -225,3 +230,15 @@ StylizedFacts.plot_all_stylized_facts(data_stylized_facts)
 #StylizedFacts.plot_acf_order_flow(market_data_stylized_facts, "")
 #StylizedFacts.plot_acf_log_returns(data_stylized_facts, "")
 #StylizedFacts.plot_acf_abs_log_returns(data_stylized_facts, "")
+
+# +
+# save_object("OneRun.jld2",(lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, sample_price_paths¹, P⁺s¹, P⁻s¹, Ps¹, 
+# lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_price_paths², P⁺s², P⁻s², Ps²))
+# temp = load_object("OneRun.jld2")
+
+# +
+# combine all different paths into one large vector
+#diff(log.(sample_price_paths¹[1:end-1,:]),dims=1)[:]
+
+# +
+#observed_summary_stats = get_summary_stats(observed_log_returns) #is in AdaptiveABC

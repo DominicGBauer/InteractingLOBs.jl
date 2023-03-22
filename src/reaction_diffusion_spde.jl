@@ -3,26 +3,28 @@ function initial_conditions_numerical(slob¹, φ_list¹, p_list¹,
                                       slob², φ_list², p_list², 
                                       t, 
                                       V₀ = 0)
-    ### corrections:
-    p_0¹ = p_list¹[t]
-    p_0² = p_list²[t]
-    slob = slob¹
-    ###end of corrections
+    if (t == 1)
+        t = t + 1
+    end
     
     # eq 36:
-    ud = (-V₀/(2.0*slob.Δx) + slob.D/(slob.Δx^2)) * ones(Float64, slob.M)#upper diagonal
-    md = ((-2.0*slob.D)/(slob.Δx^2) - slob.nu) * ones(Float64, slob.M+1) #middle diagonal
-    ld = (V₀/(2.0*slob.Δx) + slob.D/(slob.Δx^2)) * ones(Float64, slob.M) #lower diagonal
+    ud = (-V₀/(2.0*slob¹.Δx) + slob¹.D/(slob¹.Δx^2)) * ones(Float64, slob¹.M)#upper diagonal
+    md = ((-2.0*slob¹.D)/(slob¹.Δx^2) - slob¹.nu) * ones(Float64, slob¹.M+1) #middle diagonal
+    ld = (V₀/(2.0*slob¹.Δx) + slob¹.D/(slob¹.Δx^2)) * ones(Float64, slob¹.M) #lower diagonal
     A = Tridiagonal(ld, md, ud)
 
-    A[1,2] = 2*slob.D/(slob.Δx^2)
-    A[end, end-1] = 2*slob.D/(slob.Δx^2)
+    A[1,2] = 2*slob¹.D/(slob¹.Δx^2)
+    A[end, end-1] = 2*slob¹.D/(slob¹.Δx^2)
     
-    source = [slob.source_term(xᵢ, p_0¹,p_0²,t) for xᵢ in slob.x]
-    coupling = [slob.coupling_term(xᵢ, p_0¹,p_0²,t) for xᵢ in slob.x]
-    rl_push = slob¹.rl_push_term(slob¹, φ_list¹, p_list¹, 
-                                 slob², φ_list², p_list², 
-                                 t) 
+    source = slob¹.source_term(      slob¹, φ_list¹, p_list¹, 
+                                     slob², φ_list², p_list², 
+                                     t)
+    coupling = slob¹.coupling_term(  slob¹, φ_list¹, p_list¹, 
+                                     slob², φ_list², p_list², 
+                                     t)
+    rl_push = slob¹.rl_push_term(    slob¹, φ_list¹, p_list¹, 
+                                     slob², φ_list², p_list², 
+                                     t) 
     
     B = .-(source.+coupling.+rl_push)#B is s in (37)
     
@@ -152,17 +154,25 @@ function intra_time_period_simulate(slob¹, φ_list¹, p_list¹,
     rl_push² = zeros(Float64, myend)
     
     #first calculate source terms:
-    source¹ = [slob¹.source_term(xᵢ¹, p¹, p², t) for xᵢ¹ in slob¹.x]
-    coupling¹ = [slob¹.coupling_term(xᵢ¹, p¹, p², t) for xᵢ¹ in slob¹.x]
-    rl_push¹ = slob¹.rl_push_term(slob¹, φ_list¹, p_list¹, 
-                                  slob², φ_list², p_list², 
-                                  t) 
+    source¹ = slob¹.source_term(      slob¹, φ_list¹, p_list¹, 
+                                      slob², φ_list², p_list², 
+                                      t) 
+    coupling¹ = slob¹.coupling_term(  slob¹, φ_list¹, p_list¹, 
+                                      slob², φ_list², p_list², 
+                                      t) 
+    rl_push¹ = slob¹.rl_push_term(    slob¹, φ_list¹, p_list¹, 
+                                      slob², φ_list², p_list², 
+                                      t) 
     
-    source² = [slob².source_term(xᵢ², p², p¹, t) for xᵢ² in slob².x]
-    coupling² = [slob².coupling_term(xᵢ², p², p¹, t) for xᵢ² in slob².x]
-    rl_push² = slob².rl_push_term(slob¹, φ_list¹, p_list¹, 
-                                  slob², φ_list², p_list², 
-                                  t)
+    source² = slob².source_term(      slob², φ_list², p_list², 
+                                      slob¹, φ_list¹, p_list¹, 
+                                      t)
+    coupling² = slob².coupling_term(  slob¹, φ_list¹, p_list¹, 
+                                      slob², φ_list², p_list², 
+                                      t) 
+    rl_push² = slob².rl_push_term(    slob¹, φ_list¹, p_list¹, 
+                                      slob², φ_list², p_list², 
+                                      t)
     
     
     net_source¹ = source¹ .+ coupling¹ .+ rl_push¹
