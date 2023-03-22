@@ -31,17 +31,21 @@ function initial_conditions_numerical(slob¹, φ_list¹, p_list¹,
     return φ, source, coupling, rl_push
 end
 
-function initial_conditions_numerical(slob::SLOB, p_0¹, p_0², t)
-    ϵ = rand(Normal(0.0, 1.0))
-    V₀ = sign(ϵ) * min(abs(slob.σ * ϵ), slob.Δx / slob.Δt)
-    return initial_conditions_numerical(slob, p_0¹, p_0², V₀)
-end
+#function initial_conditions_numerical(slob::SLOB, p_0¹, p_0², t)
+    #ϵ = rand(Normal(0.0, 1.0))
+    #V₀ = sign(ϵ) * min(abs(slob.σ * ϵ), slob.Δx / slob.Δt)
+    #return initial_conditions_numerical(slob, p_0¹, p_0², V₀)
+#end
 
 function extract_mid_price_index(slob,lob_density)
     mid_price_ind = 2
-    while (lob_density[mid_price_ind] > 0) | (lob_density[mid_price_ind+1]>lob_density[mid_price_ind])
+    l = length(lob_density)
+    while (mid_price_ind<l)&&((lob_density[mid_price_ind] > 0) || (lob_density[mid_price_ind+1]>lob_density[mid_price_ind]))
         mid_price_ind += 1
     end #scan array in x looking for cross over point of the mid price
+    if (mid_price_ind==l || mid_price_ind==2  ) 
+        print("BE ")
+    end
     return mid_price_ind
 end
 
@@ -75,7 +79,8 @@ function calculate_self_jump_probability(Z)
 end
 
 function calculate_jump_probabilities(slob, V_t)
-    Z = (3/4) * (V_t * slob.Δx) / (slob.D)
+    Z = (3/4) * (V_t * slob.Δx) / (slob.D) #  equation 23 with modification for insertion into 24, 25 and 26
+                                            #  ≈ V_t * 3/8
     # Z = (V_t * slob.Δx) / (slob.D)
     p⁻ = calculate_left_jump_probability(Z)
     p⁺ = calculate_right_jump_probability(Z)
@@ -110,11 +115,19 @@ function intra_time_period_simulate(slob¹, φ_list¹, p_list¹,
     p² = p_list²[t-1]
     ## end of corrections
     
-    ϵ¹ = rand(Normal(0.0, 1.0))
-    ϵ² = rand(Normal(0.0, 1.0))
+    #dist = Normal(0.0, 1.0)
+    #dist = TDist(4)
     
-    V_t¹ = sign(ϵ¹) * min(  abs(slob¹.σ * ϵ¹)  ,   slob¹.Δx / slob¹.Δt  ) #????
-    V_t² = sign(ϵ²) * min(  abs(slob².σ * ϵ²)  ,   slob².Δx / slob².Δt  ) #????
+    
+    #########Old kick calculation
+    ϵ¹ = rand(slob¹.dist)
+    ϵ² = rand(slob².dist)
+    
+    V_t¹ = sign(ϵ¹) * min(  abs(slob¹.σ * ϵ¹)  ,   slob¹.Δx / slob¹.Δt  ) # Ensures V_t¹ = ϵ¹σ ≤ Δx/Δt  ????
+    V_t² = sign(ϵ²) * min(  abs(slob².σ * ϵ²)  ,   slob².Δx / slob².Δt  ) # Ensures V_t² = ϵ²σ ≤ Δx/Δt  ????
+    
+    #########New kick calculation
+    
 
     P⁺¹, P⁻¹, P¹ = calculate_jump_probabilities(slob¹, V_t¹)
     P⁺², P⁻², P² = calculate_jump_probabilities(slob², V_t²)
@@ -240,7 +253,6 @@ function dtrw_solver_no_recalc(slob¹::SLOB, slob²::SLOB)
     φ²[:, t], source²[:,t], coupling²[:,t], rl_push²[:,t] = initial_conditions_numerical(slob², φ², p² ,
                                                                           slob¹, φ¹, p¹,
                                                                           t, 0.0) #get initial shape given at t=1
-    
     t = 2
     while t <= time_steps
         

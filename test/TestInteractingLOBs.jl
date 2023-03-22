@@ -1,37 +1,58 @@
 # -*- coding: utf-8 -*-
-using StylizedFacts
-
+using Revise
 using Plots
 using RelevanceStacktrace
 using StatsBase 
+using Distributions
+using ProgressMeter
+using Statistics
+using Random
+import Random:rand
+using JLD2
 
 using InteractingLOBs
 
 # +
-#names(InteractingLOBs)
+struct Spl <: Sampleable{Univariate, Continuous}
+    p::Float64
+end  
+
+function rand(s::Spl)
+    if rand()<s.p
+        return rand(Normal(0.0, 1.0))
+    else
+        return 3
+    end
+end
 
 # +
 # Configuration Arguments
-num_paths = 4*2
+num_paths = 1
 M = 400
-T = 3000
-p₀ = 238.75
+T = 10000
 L = 200
+p₀ = 238.75
 
 # Free-Parameters for gaussian version
 D = 1.0
-σ = 1.5
+σ = 1.0 #1.5
 
 ν = 0.5
 α_slob = 40.0
 α_lob = 0.0
 α = α_lob
+
+#dist = Normal(0.0,1.0)
+#dist = TDist(1)
+dist = Spl(1)
 # -
 
 Δx = L / M 
 Δt = (Δx^2) / (2.0 * D)
 println(Δx)
 println(Δt)
+
+Δx/D
 
 # +
 λ = 1.0
@@ -66,21 +87,26 @@ Amount = 5.0
 # If position == -x where x>=0, then put it x above the mid price each time
 
 # +
-myRLPusher1 = RLPushTerm(StartTime,EndTime,Position,Amount,true)
+myRLPusher1 = RLPushTerm(StartTime,EndTime,Position,Amount,false)
 
-lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, σ, ν, α, 
+lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, σ, ν, α, dist, 
     mySourceTerm, myCouplingTerm, myRLPusher1)
 
 # +
 myRLPusher2 = RLPushTerm(StartTime,EndTime,Position,Amount,false)
 
-lob_model² = SLOB(num_paths, T, p₀, M, L, D, σ, ν, α, 
+lob_model² = SLOB(num_paths, T, p₀, M, L, D, σ, ν, α, dist,
     mySourceTerm, myCouplingTerm, myRLPusher2)
 # -
 
 lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, sample_price_paths¹, P⁺s¹, P⁻s¹, Ps¹, 
 lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_price_paths², P⁺s², P⁻s², Ps² =
-InteractOrderBooks(lob_model¹,lob_model², -1) ;
+InteractOrderBooks(lob_model¹,lob_model², -1, true) ;
+
+# +
+# save_object("OneRun.jld2",(lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, sample_price_paths¹, P⁺s¹, P⁻s¹, Ps¹, 
+# lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_price_paths², P⁺s², P⁻s², Ps²))
+# temp = load_object("OneRun.jld2")
 
 # +
 total_length = length(sample_price_paths¹[:,1]) #consists of T/Δt times
@@ -147,12 +173,55 @@ end
 gif(anim, "/tmp/LOB.gif", fps=10)
 #gif(anim, "~/Desktop/Masters/GoodPics/x.gif", fps=8)
 #gif(anim, "~/Desktop/Masters/GoodPics/LotsOfStuff.gif", fps=16)
+
+# +
+# combine all different paths into one large vector
+#diff(log.(sample_price_paths¹[1:end-1,:]),dims=1)[:]
+
+# +
+observed_price_path = sample_price_paths¹[1:end-1,1];
+observed_log_returns = diff(log.(observed_price_path[:,1]));
+
+#observed_summary_stats = get_summary_stats(observed_log_returns) #is in AdaptiveABC
 # -
 
-sample_price_paths¹[end,1] #NB problem
+data_stylized_facts = StylizedFacts.StylizedFactsPlot(observed_price_path);
 
-test = (sample_price_paths²[3-1:end-1,:] - sample_price_paths²[3-2:end-2,:])[:]
+StylizedFacts.plot_all_stylized_facts(data_stylized_facts)
 
-histogram(test)
+# +
+#sample_price_paths¹[end,1] #NB problem
 
+# +
+#middle = 3:length(sample_price_paths²[:,1])
+#price_changes = (sample_price_paths²[middle.-1,:] - sample_price_paths²[middle.-2,:])[:]
 
+# +
+#norm = fit(Normal,price_changes)
+#p(x) = pdf(norm,x)
+#
+#histogram(price_changes, label="Price changes",  normalize=:pdf, color=:gray)
+#plot!(p, label="Fitted normal", lw=1, color=:red)
+#title!(string("Price change distribution from ",length(price_changes)," samples"))
+#xlabel!("x")
+#ylabel!("Price change probability(x)")
+# +
+#using Pkg
+#Pkg.precompile("/home/derickdiana/Desktop/Masters/OfficialOne/StylizedFacts.jl")
+#rm("/home/derickdiana/.julia/compiled/v1.8/StylizedFacts/",force=true,recursive=true)
+#rm("/home/derickdiana/.julia/packages/StylizedFacts/",force=true,recursive=true)
+#using StylizedFacts
+#workspace()
+#Pkg.reload("StylizedFacts.jl")
+
+# +
+#Plot Log Returns Hist
+#dist = fit(Normal, observed_log_returns)
+#plt = histogram(observed_log_returns, normalize=true, legend=false)
+#plot!(plt, x -> pdf(dist, x), xlim=xlims(), legend=false)
+#
+#StylizedFacts.plot_log_returns(data_stylized_facts, "")
+#StylizedFacts.plot_qq_log_returns(data_stylized_facts, "")
+#StylizedFacts.plot_acf_order_flow(market_data_stylized_facts, "")
+#StylizedFacts.plot_acf_log_returns(data_stylized_facts, "")
+#StylizedFacts.plot_acf_abs_log_returns(data_stylized_facts, "")

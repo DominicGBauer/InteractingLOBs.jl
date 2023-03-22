@@ -1,8 +1,1 @@
-[Info::2023-03-13T18:46:22.981]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:120 - path 7 with seed 3840751588
-[Info::2023-03-13T18:46:22.981]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:120 - path 3 with seed 1052608359
-[Info::2023-03-13T18:46:22.981]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:120 - path 1 with seed 279019396
-[Info::2023-03-13T18:46:27.452]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:120 - path 2 with seed 1721513510
-[Info::2023-03-13T18:46:27.599]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:120 - path 6 with seed 1306216997
-[Info::2023-03-13T18:46:28.626]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:120 - path 8 with seed 3700280113
-[Info::2023-03-13T18:46:29.146]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:120 - path 4 with seed 2225733090
-[Info::2023-03-13T18:46:58.889]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-22T11:50:27.646]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:127 - path 1 with seed 71986532

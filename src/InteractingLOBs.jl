@@ -22,8 +22,10 @@ include("reaction_diffusion_path.jl")
 include("parse_params.jl")
 include("reaction_diffusion_spde.jl")
 include("objective_surface.jl")
-
-__version__ = "Sequential LOB"
+include("StylizedFacts.jl") # for now, this actually means that InteractingLOBs needs to declare that it depends on all the same things
+                            # StylizedFacts depends on (i.e. anything that StylizedFacts.jl calls with "using"). Should one day
+                            # be made into its own package
+__version__ = "Interacting LOB"
 
 foo(x) = 2*x
 
@@ -34,6 +36,6 @@ export SLOB,
        parse_commandline,
        ObjectiveSurface,
        InteractOrderBooks,
-       foo
+       StylizedFacts
 
 end # module

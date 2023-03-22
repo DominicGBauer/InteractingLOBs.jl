@@ -6,7 +6,7 @@ mutable struct SLOB
     M::Int64    # Number of discrete price points in addition to p₀ (the central point)
     L::Float64  # The length of the price dimension in the lattice
     D::Float64  # The diffusion constant (determines Δt)
-    σ::Float64  # Standard deviation in V(0,σ)
+    σ::Float64  # Standard deviation in whatever distribution
     nu::Float64 # Cancellation rate
     α::Float64  # Waiting time in terms of Exp(α)
     source_term::SourceTerm # Source term s(x,t)(μ,λ,p¹,p²) 
@@ -15,12 +15,14 @@ mutable struct SLOB
     x::Array{Float64, 1}    #
     Δx::Float64 # The grid spacing which is calculated as Δx=L/M
     Δt::Float64 # The temporal grid spacing calculated as Δt=Δx*Δx/(2D)
+    dist::Sampleable #The distribution from which the random kicks are drawn
 end
 
 
 function SLOB(num_paths::Int64, T::Int64, p₀::Float64,
     M::Int64, L::Real, D::Float64, σ::Float64, nu::Float64,
-    α::Float64, source_term::SourceTerm, coupling_term::CouplingTerm, rl_push_term::RLPushTerm)
+    α::Float64, dist::Sampleable, source_term::SourceTerm, coupling_term::CouplingTerm, rl_push_term::RLPushTerm) 
+    #translates convinient order into order expected by object itself
 
     x₀ = p₀ - 0.5*L
     x_m = p₀ + 0.5*L
@@ -28,7 +30,7 @@ function SLOB(num_paths::Int64, T::Int64, p₀::Float64,
     x = collect(Float64, range(x₀, stop=x_m, length=M+1)) #creates an array of the entries. So returns set of x points
     Δx = L/M
     Δt = (Δx^2) / (2.0*D)
-    return SLOB(num_paths, T, p₀, M, L, D, σ, nu, α, source_term, coupling_term, rl_push_term, x, Δx, Δt)
+    return SLOB(num_paths, T, p₀, M, L, D, σ, nu, α, source_term, coupling_term, rl_push_term, x, Δx, Δt, dist)
 end
 
 # +
@@ -68,7 +70,11 @@ end
 #########################My own code below here########################
 # -
 
-function InteractOrderBooks(slob¹::SLOB,slob²::SLOB, seed::Int=-1)#same but returns more stuff
+function InteractOrderBooks(slob¹::SLOB,slob²::SLOB, seed::Int=-1, progress = false)#same but returns more stuff
+    if (progress==true)
+        p = Progress(slob¹.num_paths,dt=0.1)
+    end
+    
     # do some logging IDK
     logger = FileLogger(Dict(Logging.Info => "info.log", Logging.Error => "error.log"), append=false)
     global oldglobal = global_logger(logger)
@@ -114,7 +120,8 @@ function InteractOrderBooks(slob¹::SLOB,slob²::SLOB, seed::Int=-1)#same but re
     #for path in 1:slob¹.num_paths
     counter = 0
     lk = Threads.SpinLock()
-    Threads.@threads for path = 1:slob¹.num_paths
+    #Threads.@threads for path = 1:slob¹.num_paths
+    for path = 1:slob¹.num_paths
         Random.seed!(seeds[path])
         
         @info "path $path with seed $(seeds[path])"
@@ -126,17 +133,22 @@ function InteractOrderBooks(slob¹::SLOB,slob²::SLOB, seed::Int=-1)#same but re
             P⁺s²[:, path], P⁻s²[:, path], Ps²[:, path] =
         dtrw_solver(slob¹,slob², recalc)
         
-        lock(lk)
-        try
+        #lock(lk)
+        #try
             counter += 1
             #Base.buffer_writes(string(counter," "))
             #print(string(counter," "))
-            write(stdout,string(counter," "))
-            flush(stdout)
-        finally
-            unlock(lk)
-        end
+            #write(stdout,string(counter," "))
+            #flush(stdout)
+            if (progress==true)
+                next!(p)
+            end
+        #finally
+            #unlock(lk)
+        #end
     end
+    
+    finish!(p)
 
     return   lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, sample_price_paths¹, P⁺s¹, P⁻s¹, Ps¹,
              lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_price_paths², P⁺s², P⁻s², Ps²
@@ -215,12 +227,4 @@ end
 
 #     return mid_price_paths
 # end
-
-# -
-
-Base.buffer_writes(stdout)="test"
-flush(stdout)
-
-
-
 

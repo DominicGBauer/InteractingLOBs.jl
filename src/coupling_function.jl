@@ -8,6 +8,8 @@ end
 
 function (it::CouplingTerm)(x::Float64,p¹::Float64,p²::Float64,t::Int64)
     
+    return 0 # for no coupling
+    
     f(y)=-(it.μ*(y))*exp(-(it.μ*(y))^2) #y is a temporary variable
     g = 1+tanh(abs(p²-p¹)/it.a)*it.c
     

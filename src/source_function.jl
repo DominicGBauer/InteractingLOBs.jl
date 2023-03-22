@@ -11,4 +11,3 @@ function (st::SourceTerm)(x::Float64,p¹::Float64,p²::Float64,t::Int64)
     return f(x-p¹)
     
 end
-
