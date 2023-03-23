@@ -91,16 +91,18 @@ function calculate_jump_probabilities(slob, V_t)
 end
 
 
-function get_sub_period_time(slob, t, time_steps)
-    if slob.α <= 0.0 #if using LOB
-        return 0.0, time_steps - t + 1
-    end
-    τ = rand(Exponential(slob.α)) #random exponential time until recalculation
-    remaining_time = time_steps - t + 1
-    τ_periods = min(floor(Int, τ/slob.Δt), remaining_time)
-    return τ, τ_periods #return true time and number of simulation steps
-                        #until next solve of the initial conditions when using SLOB
-end
+# +
+#function get_sub_period_time(slob, t, time_steps)
+#    if slob.α <= 0.0 #if using LOB
+#        return 0.0, time_steps - t + 1
+#    end
+#    τ = rand(Exponential(slob.α)) #random exponential time until recalculation
+#    remaining_time = time_steps - t + 1
+#    τ_periods = min(floor(Int, τ/slob.Δt), remaining_time)
+#    return τ, τ_periods #return true time and number of simulation steps
+#                        #until next solve of the initial conditions when using SLOB
+#end
+# -
 
 
 function intra_time_period_simulate(slob¹, φ_list¹, p_list¹, 
@@ -113,22 +115,15 @@ function intra_time_period_simulate(slob¹, φ_list¹, p_list¹,
     φ¹ = φ_list¹[:, t-1]
     φ² = φ_list²[:, t-1]
     
-    p¹ = p_list¹[t-1]
-    p² = p_list²[t-1]
+    #p¹ = p_list¹[t-1]
+    #p² = p_list²[t-1]
     ## end of corrections
     
-    #dist = Normal(0.0, 1.0)
-    #dist = TDist(4)
-    
-    
-    #########Old kick calculation
     ϵ¹ = rand(slob¹.dist)
     ϵ² = rand(slob².dist)
     
     V_t¹ = sign(ϵ¹) * min(  abs(slob¹.σ * ϵ¹)  ,   slob¹.Δx / slob¹.Δt  ) # Ensures V_t¹ = ϵ¹σ ≤ Δx/Δt  ????
     V_t² = sign(ϵ²) * min(  abs(slob².σ * ϵ²)  ,   slob².Δx / slob².Δt  ) # Ensures V_t² = ϵ²σ ≤ Δx/Δt  ????
-    
-    #########New kick calculation
     
 
     P⁺¹, P⁻¹, P¹ = calculate_jump_probabilities(slob¹, V_t¹)
@@ -154,23 +149,23 @@ function intra_time_period_simulate(slob¹, φ_list¹, p_list¹,
     rl_push² = zeros(Float64, myend)
     
     #first calculate source terms:
-    source¹ = slob¹.source_term(      slob¹, φ_list¹, p_list¹, 
+    source¹   = slob¹.source_term(    slob¹, φ_list¹, p_list¹, 
                                       slob², φ_list², p_list², 
                                       t) 
     coupling¹ = slob¹.coupling_term(  slob¹, φ_list¹, p_list¹, 
                                       slob², φ_list², p_list², 
                                       t) 
-    rl_push¹ = slob¹.rl_push_term(    slob¹, φ_list¹, p_list¹, 
+    rl_push¹  = slob¹.rl_push_term(   slob¹, φ_list¹, p_list¹, 
                                       slob², φ_list², p_list², 
                                       t) 
     
-    source² = slob².source_term(      slob², φ_list², p_list², 
+    source²   = slob².source_term(    slob², φ_list², p_list², 
                                       slob¹, φ_list¹, p_list¹, 
                                       t)
     coupling² = slob².coupling_term(  slob¹, φ_list¹, p_list¹, 
                                       slob², φ_list², p_list², 
                                       t) 
-    rl_push² = slob².rl_push_term(    slob¹, φ_list¹, p_list¹, 
+    rl_push²  = slob².rl_push_term(   slob¹, φ_list¹, p_list¹, 
                                       slob², φ_list², p_list², 
                                       t)
     
@@ -220,8 +215,7 @@ function dtrw_solver(slob¹::SLOB, slob²::SLOB, recalc)
 end
 
 function dtrw_solver_no_recalc(slob¹::SLOB, slob²::SLOB)
-    time_steps = get_time_steps(slob¹.T, slob¹.Δt) 
-        #makes you do many extra calculations i.e. if T=100 and Δt=0.1 then you do time_steps=T/Δt=1000 calculations
+    time_steps = to_simulation_time(slob¹.T, slob¹.Δt) 
     
     φ¹ = ones(Float64, slob¹.M + 1, time_steps + 1) #stores φ¹ for all time
     φ² = ones(Float64, slob².M + 1, time_steps + 1) #stores φ² for all time
@@ -265,9 +259,6 @@ function dtrw_solver_no_recalc(slob¹::SLOB, slob²::SLOB)
                                                                           t, 0.0) #get initial shape given at t=1
     t = 2
     while t <= time_steps
-        
-        #kick.DoNow = kick.Do&&(t>=kick.StartTime)&&(t<kick.EndTime)
-            
         φ¹[:, t], source¹[:,t], coupling¹[:,t], rl_push¹[:,t], P⁺s¹[t-1], P⁻s¹[t-1], Ps¹[t-1],  
         φ²[:, t], source²[:,t], coupling²[:,t], rl_push²[:,t], P⁺s²[t-1], P⁻s²[t-1], Ps²[t-1] =
             intra_time_period_simulate(     slob¹, φ¹, p¹,
@@ -282,7 +273,7 @@ function dtrw_solver_no_recalc(slob¹::SLOB, slob²::SLOB)
     end
     
     sample_mid_prices¹ = sample_mid_price_path(slob¹, p¹) #calculate observed mid prices
-    sample_mid_prices² = sample_mid_price_path(slob², p²)
+    sample_mid_prices² = sample_mid_price_path(slob², p²) #calculate observed mid prices
     
     return   φ¹, source¹, coupling¹, rl_push¹, p¹, sample_mid_prices¹, P⁺s¹, P⁻s¹, Ps¹,
              φ², source², coupling², rl_push², p², sample_mid_prices², P⁺s², P⁻s², Ps²

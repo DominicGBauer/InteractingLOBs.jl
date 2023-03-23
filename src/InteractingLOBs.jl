@@ -38,7 +38,9 @@ export  SLOB,
         ObjectiveSurface,
         InteractOrderBooks,
         StylizedFacts,
-        foo,
-        plot_price_impact
+        to_simulation_time,
+        to_real_time,
+        plot_price_impact,
+        foo
 
 end # module

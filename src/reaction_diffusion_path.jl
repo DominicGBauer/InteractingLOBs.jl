@@ -33,36 +33,38 @@ function SLOB(num_paths::Int64, T::Int64, p₀::Float64,
     return SLOB(num_paths, T, p₀, M, L, D, σ, nu, α, source_term, coupling_term, rl_push_term, x, Δx, Δt, dist)
 end
 
-# +
-#SLOB(dict) = SLOB(
-#    dict["num_paths"], dict["T"], dict["p₀"], dict["M"],
-#    dict["L"], dict["D"], dict["σ"], dict["nu"], dict["α"],
-#    SourceTerm(dict["λ"], dict["μ"]),InteractionTerm(dict["κ"],dict["β"])) #parse a dictionary form of the input
+function to_real_time(simulation_time::Int, Δt::Float64) # from simulation time
+    return floor(Int, (floor(Int,simulation_time - 1)+1) * Δt)
+end
 
-
-# +
-#SLOB(;num_paths::Int64=1, T::Int64=100, p₀::Real=100.0,
-#    M::Int64=100, L::Real=50.0, D::Real=4.0, σ::Real=1.0,
-#    nu::Real=0.1, α::Real=20.0, λ::Real=1.0, μ::Real=0.5, κ::Real=0.5, β::Real=0.5) =
-#    SLOB(num_paths, T, p₀, M, L, D, σ, nu, α,
-#    SourceTerm(λ, μ),InteractionTerm(κ, β)) #
-# -
-
-
-function get_time_steps(T::Int, Δt::Float64)
-    time_steps =  T / Δt #returns float like 5/3=1.666666666....
-    return floor(Int, time_steps + eps(time_steps)) #makes float tiny bit bigger then rounds down
+function to_simulation_time(real_time::Int, Δt::Float64) #from real time 
+    # if real_time = end time, this gives the total number of time indices in the simulation
+    simulation_time = real_time / Δt
+    return floor(Int, simulation_time + eps(simulation_time)) + 1 #how many simulation steps did it take to reach 'real_time'?
 end
 
 
-function get_mid_price_inds(slob::SLOB) 
-    get_mid_price_inds_temp(x) = get_time_steps(x, slob.Δt) #return ≈ floor(x/Δt). These are mid price indexes
-    mid_price_inds = get_mid_price_inds_temp.(0:slob.T) .+ 1
+# +
+# the above two are inverses for whatever unknown reason:
+#temp = 
+#        [ 
+#           [to_real_time(to_simulation_time(xi,m),m) - xi for xi in [1:10000;]]
+#           #[round(m,digits=2) for xi in [1:10000;]]
+#        for m in rand(100)]
+#
+#sum(sum(temp))
+# -
+
+function get_sample_inds_by_sampling_at_integer_real_times(slob::SLOB) #sample the simulation at integer times in real time
+    partially_applied_to_sim_time(real_times) = to_simulation_time(real_times, slob.Δt) 
+    my_real_times = 0:slob.T
+    sample_inds = partially_applied_to_sim_time.(my_real_times)
+    return sample_inds
 end
 
 function sample_mid_price_path(slob::SLOB, price_path)
-    mid_price_inds = get_mid_price_inds(slob)
-    mid_prices = price_path[mid_price_inds]
+    sample_inds = get_sample_inds_by_sampling_at_integer_real_times(slob)
+    mid_prices = price_path[sample_inds]
     return mid_prices
 end
 
@@ -87,13 +89,13 @@ function InteractOrderBooks(slob¹::SLOB,slob²::SLOB, seed::Int=-1, progress = 
     end
     
     
-    time_steps = get_time_steps(slob¹.T, slob¹.Δt)
+    time_steps = to_simulation_time(slob¹.T, slob¹.Δt) #how many time steps in the base simulation? i.e. Raw time indices
 
     raw_price_paths¹ = ones(Float64, time_steps + 1, slob¹.num_paths)
     raw_price_paths² = ones(Float64, time_steps + 1, slob².num_paths)
 
-    sample_price_paths¹ = ones(Float64, slob¹.T + 1, slob¹.num_paths)
-    sample_price_paths² = ones(Float64, slob².T + 1, slob².num_paths)
+    obs_price_paths¹ = ones(Float64, slob¹.T + 1, slob¹.num_paths)
+    obs_price_paths² = ones(Float64, slob².T + 1, slob².num_paths)
 
     lob_densities¹ = zeros(Float64, slob¹.M+1, time_steps + 1, slob¹.num_paths)#[x_entries,time t,path i]
     lob_densities² = zeros(Float64, slob².M+1, time_steps + 1, slob².num_paths)#[x_entries,time t,path i]
@@ -119,27 +121,23 @@ function InteractOrderBooks(slob¹::SLOB,slob²::SLOB, seed::Int=-1, progress = 
     
     #for path in 1:slob¹.num_paths
     counter = 0
-    lk = Threads.SpinLock()
+    #lk = Threads.SpinLock()
     #Threads.@threads for path = 1:slob¹.num_paths
     for path = 1:slob¹.num_paths
         Random.seed!(seeds[path])
         
         @info "path $path with seed $(seeds[path])"
         lob_densities¹[:, :, path], sources¹[:,:,path], couplings¹[:,:,path], rl_pushes¹[:,:,path],
-            raw_price_paths¹[:, path], sample_price_paths¹[:, path], 
+            raw_price_paths¹[:, path], obs_price_paths¹[:, path], 
             P⁺s¹[:, path], P⁻s¹[:, path], Ps¹[:, path],
         lob_densities²[:, :, path], sources²[:,:,path], couplings²[:,:,path], rl_pushes²[:,:,path],
-            raw_price_paths²[:, path], sample_price_paths²[:, path], 
+            raw_price_paths²[:, path], obs_price_paths²[:, path], 
             P⁺s²[:, path], P⁻s²[:, path], Ps²[:, path] =
         dtrw_solver(slob¹,slob², recalc)
         
         #lock(lk)
         #try
             counter += 1
-            #Base.buffer_writes(string(counter," "))
-            #print(string(counter," "))
-            #write(stdout,string(counter," "))
-            #flush(stdout)
             if (progress==true)
                 next!(p)
             end
@@ -148,11 +146,28 @@ function InteractOrderBooks(slob¹::SLOB,slob²::SLOB, seed::Int=-1, progress = 
         #end
     end
     
-    finish!(p)
+    if (progress==true)
+        finish!(p)
+    end
 
-    return   lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, sample_price_paths¹, P⁺s¹, P⁻s¹, Ps¹,
-             lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_price_paths², P⁺s², P⁻s², Ps²
+    return   lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, obs_price_paths¹, P⁺s¹, P⁻s¹, Ps¹,
+             lob_densities², sources², couplings², rl_pushes², raw_price_paths², obs_price_paths², P⁺s², P⁻s², Ps²
 end
+
+# +
+#SLOB(dict) = SLOB(
+#    dict["num_paths"], dict["T"], dict["p₀"], dict["M"],
+#    dict["L"], dict["D"], dict["σ"], dict["nu"], dict["α"],
+#    SourceTerm(dict["λ"], dict["μ"]),InteractionTerm(dict["κ"],dict["β"])) #parse a dictionary form of the input
+
+
+# +
+#SLOB(;num_paths::Int64=1, T::Int64=100, p₀::Real=100.0,
+#    M::Int64=100, L::Real=50.0, D::Real=4.0, σ::Real=1.0,
+#    nu::Real=0.1, α::Real=20.0, λ::Real=1.0, μ::Real=0.5, κ::Real=0.5, β::Real=0.5) =
+#    SLOB(num_paths, T, p₀, M, L, D, σ, nu, α,
+#    SourceTerm(λ, μ),InteractionTerm(κ, β)) #
+
 
 # +
 #not changed:

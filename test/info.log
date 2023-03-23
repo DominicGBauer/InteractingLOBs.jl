@@ -1,2 +1,46 @@
-[Info::2023-03-22T14:09:53.934]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:127 - path 1 with seed 454483055
-[Info::2023-03-22T14:10:01.751]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T01:43:53.842]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:129 - path 1 with seed 4159920833
+[Info::2023-03-23T01:43:53.851]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:129 - path 2 with seed 687907336
+[Info::2023-03-23T01:43:53.862]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:129 - path 3 with seed 3016906494
+[Info::2023-03-23T01:43:58.070]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T01:48:26.932]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T01:54:01.391]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T01:55:55.151]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:03:17.259]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:03:45.245]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:05:34.245]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:11:32.721]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:11:47.775]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:13:32.353]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:13:49.225]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:15:33.963]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:21:15.303]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:22:05.766]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:27:50.758]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:28:21.335]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:28:42.089]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:36:08.414]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:36:56.727]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:38:10.789]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:40:06.022]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:41:29.200]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:42:45.110]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:46:02.957]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:46:49.714]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:47:55.257]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:48:36.899]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:49:50.919]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:50:20.058]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:51:14.828]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:51:56.013]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T02:56:55.418]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T03:00:29.228]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T03:02:07.633]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T03:05:09.186]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T03:07:43.541]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T03:08:19.142]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T03:08:31.282]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T03:09:59.998]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T03:10:31.354]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T03:17:14.882]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T03:17:33.235]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-03-23T03:18:06.298]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
