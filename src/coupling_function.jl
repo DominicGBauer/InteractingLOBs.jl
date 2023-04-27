@@ -4,7 +4,7 @@ mutable struct CouplingTerm
     a::Float64
     b::Float64
     c::Float64
-    no_coupling::Bool
+    do_coupling::Bool
 end
 
 function CouplingTerm(μ::Float64, a::Float64, b::Float64, c::Float64)
@@ -16,7 +16,7 @@ function (it::CouplingTerm)(slob¹, φ_list¹, p_list¹,
                             slob², φ_list², p_list², 
                             t)
     
-    if (!(it.no_coupling))
+    if (!(it.do_coupling))
         return [0 for xᵢ¹ in slob¹.x] #for zero coupling
     end
     

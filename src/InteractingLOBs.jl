@@ -41,6 +41,7 @@ export  SLOB,
         to_simulation_time,
         to_real_time,
         plot_price_impact,
-        foo
+        foo,
+        SibuyaKernelModified
 
 end # module

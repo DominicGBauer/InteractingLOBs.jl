@@ -16,26 +16,65 @@ mutable struct SLOB
     Δx::Float64 # The grid spacing which is calculated as Δx=L/M
     Δt::Float64 # The temporal grid spacing calculated as Δt=Δx*Δx/(2D)
     dist::Sampleable #The distribution from which the random kicks are drawn
+    r::Float64 # Probability of self jump
+    γ::Float64 #Degree of fractional diffusion
+    SK_DP::Array{Float64,1}
+    cut_off::Int64
+    do_random::Bool
 end
 
 
 function SLOB(num_paths::Int64, T::Int64, p₀::Float64,
     M::Int64, L::Real, D::Float64, σ::Float64, nu::Float64,
-    α::Float64, dist::Sampleable, source_term::SourceTerm, coupling_term::CouplingTerm, rl_push_term::RLPushTerm) 
+    α::Float64, r::Float64, γ::Float64, 
+    dist::Sampleable, source_term::SourceTerm, coupling_term::CouplingTerm, rl_push_term::RLPushTerm, do_random::Bool) 
     #translates convinient order into order expected by object itself
+    
 
     x₀ = p₀ - 0.5*L
     x_m = p₀ + 0.5*L
-    @assert x₀ >= 0
+    #@assert x₀ >= 0
     x = collect(Float64, range(x₀, stop=x_m, length=M+1)) #creates an array of the entries. So returns set of x points
     Δx = L/M
-    Δt = (Δx^2) / (2.0*D)
-    return SLOB(num_paths, T, p₀, M, L, D, σ, nu, α, source_term, coupling_term, rl_push_term, x, Δx, Δt, dist)
+    Δt = (r * (Δx^2) / (2.0 * D))^(1/γ) #(Δx^2) / (2.0*D)
+    
+    function partially_applied_Sibuya(n)
+         return SibuyaKernelModified(n,γ,nu,Δt)
+    end
+    
+    l = to_simulation_time(T,Δt)
+    SK_DP = zeros(Float64,l)
+    
+    cut_off = 0
+
+    # basic loop
+    next_sk = γ
+    SK_DP[cut_off+1] = next_sk*exp(-(cut_off+1)*nu*Δt)                                   
+    cut_off += 1                                    
+    
+    # special case for cut_off = 2
+    next_sk = (-1+γ)*(1-(2-γ)/(cut_off+1))
+    SK_DP[cut_off+1] = next_sk*exp(-(cut_off+1)*nu*Δt)                                   
+    
+    # check if latest meets condition to be included. Only then do we increase the cutoff and calculate again
+    while (cut_off<(l-1)) && (SK_DP[cut_off+1]<=-0.01)            
+        cut_off += 1
+        
+        next_sk = next_sk * (1-(2-γ)/(cut_off+1)) 
+        SK_DP[cut_off+1] = next_sk * exp(-(cut_off+1)*nu*Δt)                    
+    end
+   
+    SK_DP = SK_DP[1:cut_off] #shorten the array to whatever cutoff was found
+    
+    return SLOB(num_paths, T, p₀, M, L, D, σ, nu, α, source_term, coupling_term, rl_push_term, x, Δx, Δt, dist, r, γ, SK_DP,cut_off,do_random)
 end
+
+
 
 function to_real_time(simulation_time::Int, Δt::Float64) # from simulation time
     return floor(Int, (floor(Int,simulation_time - 1)+1) * Δt)
 end
+
 
 function to_simulation_time(real_time::Int, Δt::Float64) #from real time 
     # if real_time = end time, this gives the total number of time indices in the simulation
@@ -89,7 +128,7 @@ function InteractOrderBooks(slob¹::SLOB,slob²::SLOB, seed::Int=-1, progress = 
     end
     
     
-    time_steps = to_simulation_time(slob¹.T, slob¹.Δt) #how many time steps in the base simulation? i.e. Raw time indices
+    time_steps = to_simulation_time(slob¹.T, slob¹.Δt) #how many time steps in the base simulation? i.e.Raw time indices
 
     raw_price_paths¹ = ones(Float64, time_steps + 1, slob¹.num_paths)
     raw_price_paths² = ones(Float64, time_steps + 1, slob².num_paths)
@@ -112,10 +151,13 @@ function InteractOrderBooks(slob¹::SLOB,slob²::SLOB, seed::Int=-1, progress = 
     P⁺s¹ = ones(Float64, time_steps, slob¹.num_paths)
     P⁻s¹ = ones(Float64, time_steps, slob¹.num_paths)
     Ps¹ = ones(Float64, time_steps, slob¹.num_paths)
+    V¹ = ones(Float64, time_steps+1, slob¹.num_paths)
     
     P⁺s² = ones(Float64, time_steps, slob².num_paths)
     P⁻s² = ones(Float64, time_steps, slob².num_paths)
     Ps² = ones(Float64, time_steps, slob².num_paths)
+    V² = ones(Float64, time_steps+1, slob².num_paths)
+    broke_points = ones(Float64, slob².num_paths)
     
     recalc = slob¹.α > 0.0 
     
@@ -124,15 +166,16 @@ function InteractOrderBooks(slob¹::SLOB,slob²::SLOB, seed::Int=-1, progress = 
     #lk = Threads.SpinLock()
     #Threads.@threads for path = 1:slob¹.num_paths
     for path = 1:slob¹.num_paths
+        broke_point = -1;
         Random.seed!(seeds[path])
         
         @info "path $path with seed $(seeds[path])"
         lob_densities¹[:, :, path], sources¹[:,:,path], couplings¹[:,:,path], rl_pushes¹[:,:,path],
             raw_price_paths¹[:, path], obs_price_paths¹[:, path], 
-            P⁺s¹[:, path], P⁻s¹[:, path], Ps¹[:, path],
+            P⁺s¹[:, path], P⁻s¹[:, path], Ps¹[:, path], V¹[:, path],
         lob_densities²[:, :, path], sources²[:,:,path], couplings²[:,:,path], rl_pushes²[:,:,path],
             raw_price_paths²[:, path], obs_price_paths²[:, path], 
-            P⁺s²[:, path], P⁻s²[:, path], Ps²[:, path] =
+            P⁺s²[:, path], P⁻s²[:, path], Ps²[:, path], V²[:, path], broke_points[path] =
         dtrw_solver(slob¹,slob², recalc)
         
         #lock(lk)
@@ -150,8 +193,9 @@ function InteractOrderBooks(slob¹::SLOB,slob²::SLOB, seed::Int=-1, progress = 
         finish!(p)
     end
 
-    return   lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, obs_price_paths¹, P⁺s¹, P⁻s¹, Ps¹,
-             lob_densities², sources², couplings², rl_pushes², raw_price_paths², obs_price_paths², P⁺s², P⁻s², Ps²
+    return   lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, obs_price_paths¹, P⁺s¹, P⁻s¹, Ps¹, V¹,
+             lob_densities², sources², couplings², rl_pushes², raw_price_paths², obs_price_paths², P⁺s², P⁻s², Ps², V², 
+             broke_points
 end
 
 # +

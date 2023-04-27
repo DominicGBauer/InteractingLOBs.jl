@@ -1,46 +1,200 @@
-[Info::2023-03-23T01:43:53.842]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:129 - path 1 with seed 4159920833
-[Info::2023-03-23T01:43:53.851]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:129 - path 2 with seed 687907336
-[Info::2023-03-23T01:43:53.862]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:129 - path 3 with seed 3016906494
-[Info::2023-03-23T01:43:58.070]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T01:48:26.932]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T01:54:01.391]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T01:55:55.151]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:03:17.259]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:03:45.245]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:05:34.245]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:11:32.721]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:11:47.775]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:13:32.353]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:13:49.225]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:15:33.963]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:21:15.303]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:22:05.766]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:27:50.758]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:28:21.335]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:28:42.089]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:36:08.414]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:36:56.727]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:38:10.789]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:40:06.022]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:41:29.200]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:42:45.110]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:46:02.957]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:46:49.714]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:47:55.257]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:48:36.899]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:49:50.919]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:50:20.058]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:51:14.828]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:51:56.013]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T02:56:55.418]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T03:00:29.228]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T03:02:07.633]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T03:05:09.186]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T03:07:43.541]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T03:08:19.142]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T03:08:31.282]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T03:09:59.998]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T03:10:31.354]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T03:17:14.882]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T03:17:33.235]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
-[Info::2023-03-23T03:18:06.298]  Plots@/home/derickdiana/.julia/packages/Plots/bMtsB/src/animation.jl:156 - Saved animation to /tmp/LOB.gif
+[Info::2023-04-21T10:58:52.882]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 1 with seed 462209756
+[Info::2023-04-21T10:58:53.013]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 2 with seed 2690313634
+[Info::2023-04-21T10:58:53.146]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 3 with seed 2501944212
+[Info::2023-04-21T10:58:53.591]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 4 with seed 328517721
+[Info::2023-04-21T10:58:53.739]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 5 with seed 1546774309
+[Info::2023-04-21T10:58:54.077]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 6 with seed 1897967602
+[Info::2023-04-21T10:58:54.219]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 7 with seed 3579096887
+[Info::2023-04-21T10:58:54.555]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 8 with seed 1553007331
+[Info::2023-04-21T10:58:54.699]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 9 with seed 4075368500
+[Info::2023-04-21T10:58:55.034]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 10 with seed 1958035745
+[Info::2023-04-21T10:58:55.180]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 11 with seed 3846341866
+[Info::2023-04-21T10:58:55.516]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 12 with seed 2819216167
+[Info::2023-04-21T10:58:55.661]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 13 with seed 4291684831
+[Info::2023-04-21T10:58:55.994]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 14 with seed 1365574426
+[Info::2023-04-21T10:58:56.142]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 15 with seed 3972889869
+[Info::2023-04-21T10:58:56.479]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 16 with seed 3972537716
+[Info::2023-04-21T10:58:56.640]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 17 with seed 3984857425
+[Info::2023-04-21T10:58:56.989]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 18 with seed 3146083820
+[Info::2023-04-21T10:58:57.132]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 19 with seed 1919854220
+[Info::2023-04-21T10:58:57.468]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 20 with seed 3301426673
+[Info::2023-04-21T10:58:57.613]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 21 with seed 2778676263
+[Info::2023-04-21T10:58:57.947]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 22 with seed 2196888252
+[Info::2023-04-21T10:58:58.091]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 23 with seed 3578405059
+[Info::2023-04-21T10:58:58.432]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 24 with seed 2462963462
+[Info::2023-04-21T10:58:58.578]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 25 with seed 3699277417
+[Info::2023-04-21T10:58:58.913]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 26 with seed 3854755602
+[Info::2023-04-21T10:58:59.055]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 27 with seed 4056387058
+[Info::2023-04-21T10:58:59.390]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 28 with seed 972279755
+[Info::2023-04-21T10:58:59.535]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 29 with seed 3541882581
+[Info::2023-04-21T10:58:59.872]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 30 with seed 3731777926
+[Info::2023-04-21T10:59:00.020]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 31 with seed 2902762056
+[Info::2023-04-21T10:59:00.364]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 32 with seed 3632722509
+[Info::2023-04-21T10:59:00.509]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 33 with seed 3237812552
+[Info::2023-04-21T10:59:00.843]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 34 with seed 1323146303
+[Info::2023-04-21T10:59:00.985]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 35 with seed 2594992441
+[Info::2023-04-21T10:59:01.326]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 36 with seed 4170676193
+[Info::2023-04-21T10:59:01.473]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 37 with seed 3061436899
+[Info::2023-04-21T10:59:01.809]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 38 with seed 3791408439
+[Info::2023-04-21T10:59:01.951]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 39 with seed 3721246814
+[Info::2023-04-21T10:59:02.288]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 40 with seed 3150142601
+[Info::2023-04-21T10:59:02.436]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 41 with seed 94362519
+[Info::2023-04-21T10:59:02.774]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 42 with seed 2841002653
+[Info::2023-04-21T10:59:02.919]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 43 with seed 1727899471
+[Info::2023-04-21T10:59:03.257]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 44 with seed 3138209129
+[Info::2023-04-21T10:59:03.406]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 45 with seed 380308510
+[Info::2023-04-21T10:59:03.745]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 46 with seed 3879034449
+[Info::2023-04-21T10:59:03.892]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 47 with seed 374809315
+[Info::2023-04-21T10:59:04.230]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 48 with seed 2865242339
+[Info::2023-04-21T10:59:04.378]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 49 with seed 2282170797
+[Info::2023-04-21T10:59:04.712]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 50 with seed 773808618
+[Info::2023-04-21T10:59:04.854]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 51 with seed 1318966297
+[Info::2023-04-21T10:59:05.186]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 52 with seed 3339661888
+[Info::2023-04-21T10:59:05.331]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 53 with seed 1329781896
+[Info::2023-04-21T10:59:05.665]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 54 with seed 1607059957
+[Info::2023-04-21T10:59:05.810]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 55 with seed 1331057184
+[Info::2023-04-21T10:59:06.145]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 56 with seed 101033615
+[Info::2023-04-21T10:59:06.290]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 57 with seed 3131652464
+[Info::2023-04-21T10:59:06.633]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 58 with seed 2301347864
+[Info::2023-04-21T10:59:06.777]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 59 with seed 3023826031
+[Info::2023-04-21T10:59:07.133]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 60 with seed 1075640572
+[Info::2023-04-21T10:59:07.288]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 61 with seed 1285735316
+[Info::2023-04-21T10:59:07.627]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 62 with seed 1195601472
+[Info::2023-04-21T10:59:07.772]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 63 with seed 2289522870
+[Info::2023-04-21T10:59:08.115]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 64 with seed 2227391151
+[Info::2023-04-21T10:59:08.261]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 65 with seed 1764210302
+[Info::2023-04-21T10:59:08.601]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 66 with seed 2714762451
+[Info::2023-04-21T10:59:08.748]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 67 with seed 405633512
+[Info::2023-04-21T10:59:09.083]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 68 with seed 321599442
+[Info::2023-04-21T10:59:09.229]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 69 with seed 3887110350
+[Info::2023-04-21T10:59:09.566]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 70 with seed 3101262843
+[Info::2023-04-21T10:59:09.710]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 71 with seed 2740390198
+[Info::2023-04-21T10:59:10.048]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 72 with seed 1807938595
+[Info::2023-04-21T10:59:10.208]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 73 with seed 2083285979
+[Info::2023-04-21T10:59:10.545]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 74 with seed 806354670
+[Info::2023-04-21T10:59:10.688]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 75 with seed 2458711647
+[Info::2023-04-21T10:59:11.022]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 76 with seed 3010528506
+[Info::2023-04-21T10:59:11.171]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 77 with seed 199845422
+[Info::2023-04-21T10:59:11.510]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 78 with seed 3800451061
+[Info::2023-04-21T10:59:11.655]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 79 with seed 1840812618
+[Info::2023-04-21T10:59:11.994]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 80 with seed 2998535530
+[Info::2023-04-21T10:59:12.142]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 81 with seed 2522520297
+[Info::2023-04-21T10:59:12.482]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 82 with seed 3065747301
+[Info::2023-04-21T10:59:12.626]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 83 with seed 807863124
+[Info::2023-04-21T10:59:12.963]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 84 with seed 3514888929
+[Info::2023-04-21T10:59:13.108]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 85 with seed 567301269
+[Info::2023-04-21T10:59:13.444]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 86 with seed 3841482929
+[Info::2023-04-21T10:59:13.590]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 87 with seed 2239703573
+[Info::2023-04-21T10:59:13.930]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 88 with seed 611554885
+[Info::2023-04-21T10:59:14.075]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 89 with seed 1757963945
+[Info::2023-04-21T10:59:14.413]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 90 with seed 2033800054
+[Info::2023-04-21T10:59:14.555]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 91 with seed 921739085
+[Info::2023-04-21T10:59:14.893]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 92 with seed 1902115222
+[Info::2023-04-21T10:59:15.037]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 93 with seed 385171623
+[Info::2023-04-21T10:59:15.377]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 94 with seed 2421293848
+[Info::2023-04-21T10:59:15.521]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 95 with seed 4151397067
+[Info::2023-04-21T10:59:15.854]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 96 with seed 1026529272
+[Info::2023-04-21T10:59:16]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 97 with seed 1037271201
+[Info::2023-04-21T10:59:16.349]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 98 with seed 178478263
+[Info::2023-04-21T10:59:16.494]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 99 with seed 2283838071
+[Info::2023-04-21T10:59:16.842]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 100 with seed 2569024285
+[Info::2023-04-21T10:59:16.994]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 101 with seed 3850926771
+[Info::2023-04-21T10:59:17.330]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 102 with seed 3379109018
+[Info::2023-04-21T10:59:17.474]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 103 with seed 1847514712
+[Info::2023-04-21T10:59:17.811]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 104 with seed 522432646
+[Info::2023-04-21T10:59:17.956]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 105 with seed 2676828147
+[Info::2023-04-21T10:59:18.290]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 106 with seed 474629379
+[Info::2023-04-21T10:59:18.439]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 107 with seed 4160703423
+[Info::2023-04-21T10:59:18.772]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 108 with seed 1447304499
+[Info::2023-04-21T10:59:18.918]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 109 with seed 3055947610
+[Info::2023-04-21T10:59:19.254]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 110 with seed 1847435104
+[Info::2023-04-21T10:59:19.400]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 111 with seed 3266376055
+[Info::2023-04-21T10:59:19.735]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 112 with seed 841895772
+[Info::2023-04-21T10:59:19.881]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 113 with seed 3960324164
+[Info::2023-04-21T10:59:20.220]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 114 with seed 828474626
+[Info::2023-04-21T10:59:20.366]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 115 with seed 1401910245
+[Info::2023-04-21T10:59:20.703]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 116 with seed 331181436
+[Info::2023-04-21T10:59:20.848]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 117 with seed 3056280845
+[Info::2023-04-21T10:59:21.182]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 118 with seed 3237857134
+[Info::2023-04-21T10:59:21.325]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 119 with seed 703835703
+[Info::2023-04-21T10:59:21.660]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 120 with seed 888102811
+[Info::2023-04-21T10:59:21.805]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 121 with seed 2444376749
+[Info::2023-04-21T10:59:22.144]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 122 with seed 3760612652
+[Info::2023-04-21T10:59:22.292]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 123 with seed 46379541
+[Info::2023-04-21T10:59:22.635]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 124 with seed 3636649574
+[Info::2023-04-21T10:59:22.782]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 125 with seed 1572638994
+[Info::2023-04-21T10:59:23.131]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 126 with seed 18935327
+[Info::2023-04-21T10:59:23.275]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 127 with seed 4280485029
+[Info::2023-04-21T10:59:23.615]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 128 with seed 2324179318
+[Info::2023-04-21T10:59:23.764]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 129 with seed 150132665
+[Info::2023-04-21T10:59:24.103]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 130 with seed 3864012847
+[Info::2023-04-21T10:59:24.263]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 131 with seed 3360933038
+[Info::2023-04-21T10:59:24.605]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 132 with seed 1263334094
+[Info::2023-04-21T10:59:24.750]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 133 with seed 269793978
+[Info::2023-04-21T10:59:25.091]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 134 with seed 41065585
+[Info::2023-04-21T10:59:25.242]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 135 with seed 1023918645
+[Info::2023-04-21T10:59:25.580]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 136 with seed 1756703049
+[Info::2023-04-21T10:59:25.725]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 137 with seed 3691783463
+[Info::2023-04-21T10:59:26.059]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 138 with seed 1452799912
+[Info::2023-04-21T10:59:26.203]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 139 with seed 1991937146
+[Info::2023-04-21T10:59:26.542]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 140 with seed 2841781589
+[Info::2023-04-21T10:59:26.700]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 141 with seed 3838124843
+[Info::2023-04-21T10:59:27.050]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 142 with seed 1350508234
+[Info::2023-04-21T10:59:27.195]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 143 with seed 3980016703
+[Info::2023-04-21T10:59:27.536]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 144 with seed 2185272131
+[Info::2023-04-21T10:59:27.681]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 145 with seed 1498518341
+[Info::2023-04-21T10:59:28.019]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 146 with seed 1636460181
+[Info::2023-04-21T10:59:28.166]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 147 with seed 3050514821
+[Info::2023-04-21T10:59:28.516]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 148 with seed 1565551033
+[Info::2023-04-21T10:59:28.663]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 149 with seed 1832960484
+[Info::2023-04-21T10:59:29]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 150 with seed 994079534
+[Info::2023-04-21T10:59:29.145]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 151 with seed 523882576
+[Info::2023-04-21T10:59:29.480]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 152 with seed 74018842
+[Info::2023-04-21T10:59:29.625]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 153 with seed 227488866
+[Info::2023-04-21T10:59:29.962]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 154 with seed 4206983832
+[Info::2023-04-21T10:59:30.108]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 155 with seed 4129007380
+[Info::2023-04-21T10:59:30.446]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 156 with seed 2441025378
+[Info::2023-04-21T10:59:30.593]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 157 with seed 1128821401
+[Info::2023-04-21T10:59:30.927]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 158 with seed 2204988593
+[Info::2023-04-21T10:59:31.069]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 159 with seed 3448437905
+[Info::2023-04-21T10:59:31.413]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 160 with seed 806306382
+[Info::2023-04-21T10:59:31.560]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 161 with seed 1235565879
+[Info::2023-04-21T10:59:31.894]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 162 with seed 1526775996
+[Info::2023-04-21T10:59:32.035]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 163 with seed 2423046109
+[Info::2023-04-21T10:59:32.376]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 164 with seed 3645340224
+[Info::2023-04-21T10:59:32.521]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 165 with seed 3204011949
+[Info::2023-04-21T10:59:32.857]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 166 with seed 3199693754
+[Info::2023-04-21T10:59:33.002]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 167 with seed 850009150
+[Info::2023-04-21T10:59:33.341]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 168 with seed 1304275675
+[Info::2023-04-21T10:59:33.486]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 169 with seed 480807067
+[Info::2023-04-21T10:59:33.823]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 170 with seed 575987424
+[Info::2023-04-21T10:59:33.966]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 171 with seed 3286480439
+[Info::2023-04-21T10:59:34.305]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 172 with seed 1899140448
+[Info::2023-04-21T10:59:34.453]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 173 with seed 3232604148
+[Info::2023-04-21T10:59:34.791]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 174 with seed 3405824292
+[Info::2023-04-21T10:59:34.935]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 175 with seed 2276533206
+[Info::2023-04-21T10:59:35.275]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 176 with seed 4236755990
+[Info::2023-04-21T10:59:35.428]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 177 with seed 3098250523
+[Info::2023-04-21T10:59:35.767]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 178 with seed 2483481424
+[Info::2023-04-21T10:59:35.915]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 179 with seed 2670619393
+[Info::2023-04-21T10:59:36.255]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 180 with seed 3862053772
+[Info::2023-04-21T10:59:36.404]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 181 with seed 1089908734
+[Info::2023-04-21T10:59:36.745]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 182 with seed 3393308416
+[Info::2023-04-21T10:59:36.907]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 183 with seed 171373259
+[Info::2023-04-21T10:59:37.251]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 184 with seed 293475750
+[Info::2023-04-21T10:59:37.402]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 185 with seed 1660736532
+[Info::2023-04-21T10:59:37.741]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 186 with seed 3150371581
+[Info::2023-04-21T10:59:37.885]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 187 with seed 269012361
+[Info::2023-04-21T10:59:38.219]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 188 with seed 1402078868
+[Info::2023-04-21T10:59:38.367]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 189 with seed 4229365711
+[Info::2023-04-21T10:59:38.707]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 190 with seed 3186794131
+[Info::2023-04-21T10:59:38.853]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 191 with seed 2361730775
+[Info::2023-04-21T10:59:39.188]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 192 with seed 2004083860
+[Info::2023-04-21T10:59:39.334]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 193 with seed 295877966
+[Info::2023-04-21T10:59:39.670]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 194 with seed 3951691786
+[Info::2023-04-21T10:59:39.813]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 195 with seed 2242460338
+[Info::2023-04-21T10:59:40.150]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 196 with seed 2041709867
+[Info::2023-04-21T10:59:40.300]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 197 with seed 601598624
+[Info::2023-04-21T10:59:40.639]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 198 with seed 3985748629
+[Info::2023-04-21T10:59:40.783]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 199 with seed 3621199557
+[Info::2023-04-21T10:59:41.118]  InteractingLOBs@/home/derickdiana/Desktop/Masters/OfficialOne/InteractingLOBs.jl/src/reaction_diffusion_path.jl:172 - path 200 with seed 1776609335

@@ -18,7 +18,7 @@ function (rl::RLPushTerm)(slob¹, φ_list¹, p_list¹,
     
     if rl.Do&&(t>=rl.StartTime)&&(t<rl.EndTime) #never run with t=1
         if (rl.Position>0)
-            #temp[rl.Position] = -rl.Amount
+            temp[rl.Position] = -rl.Amount
         else 
             latest_φ = φ_list¹[:,t-1]
             
@@ -31,9 +31,9 @@ function (rl::RLPushTerm)(slob¹, φ_list¹, p_list¹,
             # optional rescale of all points except index_to_modify (it is overwritten below) 
             # to have negative the area that index_to_modify has
             
-            area = sum(latest_φ[left_side])
-            rescaled_latest_φ = latest_φ[left_side] ./ area .* rl.Amount
-            temp[left_side] = rescaled_latest_φ
+            #area = sum(latest_φ[left_side])
+            #rescaled_latest_φ = latest_φ[left_side] ./ area .* rl.Amount
+            #temp[left_side] = rescaled_latest_φ
             
             
             temp[index_to_modify] = temp[index_to_modify] - rl.Amount
@@ -46,10 +46,3 @@ function (rl::RLPushTerm)(slob¹, φ_list¹, p_list¹,
     return temp
     
 end
-# -
-
-a = [1:5;]
-
-a[1:end .!= 3]
-
-

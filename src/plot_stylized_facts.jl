@@ -12,10 +12,17 @@ mutable struct StylizedFactsPlot
     u_conf::Float64
 end
 
+# +
 function StylizedFactsPlot(price_path)
     log_price_path = log.(price_path) #Apply log onto price path
     log_returns = diff(log_price_path) # returns log_returns[i+1] - log_returns[i] for all i in 1 to end-1
 
+    return StylizedFactsPlot(price_path,log_price_path, log_returns) 
+    
+end
+# -
+
+function StylizedFactsPlot(price_path,log_price_path,log_returns)
     order_signs = tick_rule(price_path)
     order_flow_acf = autocor(order_signs)
 
@@ -29,7 +36,7 @@ function StylizedFactsPlot(price_path)
 
     return StylizedFactsPlot(price_path, log_price_path, log_returns,
         order_signs, order_flow_acf, log_returns_acf, abs_log_returns_acf,
-        N, L, l_conf, u_conf)
+        N, L, l_conf, u_conf) 
 end
 
 function hist_log_returns(sf::StylizedFactsPlot, title="Log Returns Histogram")
