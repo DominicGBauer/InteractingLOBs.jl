@@ -44,6 +44,7 @@ export  SLOB,
         StylizedFacts,
         to_simulation_time,
         to_real_time,
+        clear_double_dict,
         plot_price_impact,
         foo,
         SibuyaKernelModified

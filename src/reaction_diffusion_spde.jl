@@ -3,7 +3,7 @@
 function initial_conditions_numerical(D, 
                                         t, slob_num, V₀=0)
     slob¹ = D[slob_num].slob
-    slob² = D[2+(1-slob_num)].slob
+    #slob² = D[2+(1-slob_num)].slob
     
     if (t == 1)
         t = t + 1
@@ -115,7 +115,7 @@ function intra_time_period_simulate_fractional( D,
                P  * D[slob_num].lob_densities[1        ,t_m]  ) 
 
         φ_next[end] += front * 
-        (  P⁻ * D[slob_num].lob_densities[end          ,t_m] + 
+            (  P⁻ * D[slob_num].lob_densities[end      ,t_m] + 
                P⁺ * D[slob_num].lob_densities[end-1    ,t_m] + 
                P  * D[slob_num].lob_densities[end      ,t_m]  )
 
@@ -159,7 +159,10 @@ function dtrw_solver_fractional(D) #handles change over time logic
     end
     
     t = 2
-    while (t <= time_steps) && (!(D[1].raw_price_paths[t-1]==-1) || (D[2].raw_price_paths[t-1]==-1)) 
+    
+    #not_broke = true
+    not_broke = reduce(&,[(D[l].raw_price_paths[t-1]!=-1 || !D[l].slob.source_term.do_source) for l in 1:length(D)],init=true) #only true when non of the most recent raw price values are -1
+    while (t <= time_steps) && (not_broke)
         for slob_num in 1:length(D)
             intra_time_period_simulate_fractional( D, t, slob_num) 
             
@@ -168,10 +171,11 @@ function dtrw_solver_fractional(D) #handles change over time logic
         end
         
         t += 1 
+        not_broke = reduce(&,[(D[l].raw_price_paths[t-1]!=-1 || !D[l].slob.source_term.do_source) for l in 1:length(D)],init=true)
     end
     
     #check if broken
-    if (D[1].raw_price_paths[t-1]==-1) || (D[2].raw_price_paths[t-1]==-1)
+    if !(not_broke)
         print("BE")
         broke_point = t-1
     end
@@ -183,6 +187,9 @@ function dtrw_solver_fractional(D) #handles change over time logic
     
 end
 # -
+
+test = [1,1,1,2]
+not_broke = reduce(&,[(test[l]!=2) for l in 1:length(test)],init=true)
 
 # # New Junk
 

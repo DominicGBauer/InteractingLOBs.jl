@@ -78,6 +78,20 @@ function to_simulation_time(real_time, Δt::Float64) #from real time
 end
 
 
+function clear_double_dict(D)
+    names = fieldnames(typeof(D))
+
+    for (key1,value1) in D
+        outer_dict = D[key1]
+        for (key2,value2) in outer_dict
+            inner_dict = outer_dict[key2]
+            for name in names
+               getfield(inner_dict,name) = nothing
+            end
+        end
+    end
+end
+
 # +
 # the above two are inverses for whatever unknown reason:
 #temp = 
@@ -163,7 +177,8 @@ function InteractOrderBooks(slobs::Array{SLOB,1}, seed::Int=-1, progress = false
         
     end
     
-    #print(outer_dict)
+    #print(length(outer_dict[1]))
+    
     
     
     broke_points =     ones(Float64,             slob.num_paths)

@@ -32,7 +32,7 @@ function (rl::RLPushTerm)(D,
             
             index_to_modify = my_p - rl.Position
             
-            left_side = [1:my_p;]
+            #left_side = [1:my_p;]
             
             # optional rescale of all points except index_to_modify (it is overwritten below) 
             # to have negative the area that index_to_modify has
