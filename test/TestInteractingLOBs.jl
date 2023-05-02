@@ -10,6 +10,7 @@ using Random
 using CurveFit
 import Random:rand
 using SpecialFunctions
+using JLD2
 
 using InteractingLOBs
 
@@ -65,7 +66,7 @@ dist = Normal(0.0,1.0)
 λ = 1.0
 μ = 0.1 
 
-mySourceTerm = SourceTerm(λ, μ, true);
+mySourceTerm = SourceTerm(λ, μ, false);
 
 # +
 # coupling:
@@ -74,15 +75,13 @@ b = 1.0   #weighting of interaction term: strong is 2
 c = 1.2   #skew factor: strong is 2
 
 myCouplingTerm = CouplingTerm(μ, a, b, c, true);
+# -
 
-# +
 RealStartTime = 0 # when, in real time, to kick the system
 SimStartTime = to_simulation_time(RealStartTime,Δt)-2 # convert to simulation time
 SimEndTime = SimStartTime + 10 # when to stop kicking, in simulation time
 Position = 200
-Volume = -8;
-
-# If position == -x where x>=0, then put it x above the mid price each time
+Volume = -8;# If position == -x where x>=0, then put it x above the mid price each time
 
 # +
 myRLPusher1 = RLPushTerm(SimStartTime,SimEndTime,Position,Volume,false)

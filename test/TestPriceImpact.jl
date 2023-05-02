@@ -19,20 +19,18 @@ using InteractingLOBs
 
 L = 200     # real system width (e.g. 200 meters)
 M = 400     # divided into M pieces  
-p₀ = 238.75 #this is the mid_price at t=0 
+p₀ = 230.0 #this is the mid_price at t=0 
 
 # Free-Parameters for gaussian version
-D = 1.0 # real diffusion constant e.g. D=1 (meters^2 / second)
+D = 0.5 # real diffusion constant e.g. D=1 (meters^2 / second)
 σ = 1.0 
 
 ν = 0.5
-α_slob = 40.0
-α_lob = 0.0
-α = α_lob
+α = 0.0
 γ = 0.5
 r = 0.5
 
-dist = Normal(0.0,1.0);
+dist = Normal(0.0,σ);
 #dist = TDist(1)
 # -
 

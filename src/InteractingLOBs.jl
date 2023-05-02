@@ -18,6 +18,8 @@ using TSSM
 include("source_function.jl")
 include("coupling_function.jl")
 include("rl_push_function.jl")
+include("randomness_function.jl")
+include("data_passer.jl")
 include("reaction_diffusion_path.jl")
 include("parse_params.jl")
 include("reaction_diffusion_spde.jl")
@@ -34,6 +36,8 @@ export  SLOB,
         SourceTerm,
         CouplingTerm,
         RLPushTerm,
+        RandomnessTerm,
+        DataPasser,
         parse_commandline,
         ObjectiveSurface,
         InteractOrderBooks,

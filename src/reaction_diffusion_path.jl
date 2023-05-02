@@ -6,35 +6,32 @@ mutable struct SLOB
     M::Int64    # Number of discrete price points in addition to p₀ (the central point)
     L::Float64  # The length of the price dimension in the lattice
     D::Float64  # The diffusion constant (determines Δt)
-    σ::Float64  # Standard deviation in whatever distribution
     nu::Float64 # Cancellation rate
     α::Float64  # Waiting time in terms of Exp(α)
     source_term::SourceTerm # Source term s(x,t)(μ,λ,p¹,p²) 
     coupling_term::CouplingTerm # Interaction term c(x,t)(μ,λ,p¹,p²)
     rl_push_term::RLPushTerm
+    randomness_term::RandomnessTerm
     x::Array{Float64, 1}    #
     Δx::Float64 # The grid spacing which is calculated as Δx=L/M
     Δt::Float64 # The temporal grid spacing calculated as Δt=Δx*Δx/(2D)
-    dist::Sampleable #The distribution from which the random kicks are drawn
-    r::Float64 # Probability of self jump
     γ::Float64 #Degree of fractional diffusion
     SK_DP::Array{Float64,1}
     cut_off::Int64
-    do_random::Bool
 end
 
 
 function SLOB(num_paths::Int64, T::Int64, p₀::Float64,
-    M::Int64, L::Real, D::Float64, σ::Float64, nu::Float64,
-    α::Float64, r::Float64, γ::Float64, 
-    dist::Sampleable, source_term::SourceTerm, coupling_term::CouplingTerm, rl_push_term::RLPushTerm, do_random::Bool) 
+    M::Int64, L::Real, D::Float64, nu::Float64,
+    α::Float64, γ::Float64, 
+    source_term::SourceTerm, coupling_term::CouplingTerm, rl_push_term::RLPushTerm, randomness_term::RandomnessTerm) 
     #translates convinient order into order expected by object itself
     
-
     x₀ = p₀ - 0.5*L
     x_m = p₀ + 0.5*L
     #@assert x₀ >= 0
     x = collect(Float64, range(x₀, stop=x_m, length=M+1)) #creates an array of the entries. So returns set of x points
+    r = randomness_term.r
     Δx = L/M
     Δt = (r * (Δx^2) / (2.0 * D))^(1/γ) #(Δx^2) / (2.0*D)
     
@@ -57,7 +54,7 @@ function SLOB(num_paths::Int64, T::Int64, p₀::Float64,
     SK_DP[cut_off+1] = next_sk*exp(-(cut_off+1)*nu*Δt)                                   
     
     # check if latest meets condition to be included. Only then do we increase the cutoff and calculate again
-    while (cut_off<(l-1)) && (SK_DP[cut_off+1]<=-0.01)            
+    while (cut_off<(l-1)) && (SK_DP[cut_off+1]<=-0.001)            
         cut_off += 1
         
         next_sk = next_sk * (1-(2-γ)/(cut_off+1)) 
@@ -66,17 +63,15 @@ function SLOB(num_paths::Int64, T::Int64, p₀::Float64,
    
     SK_DP = SK_DP[1:cut_off] #shorten the array to whatever cutoff was found
     
-    return SLOB(num_paths, T, p₀, M, L, D, σ, nu, α, source_term, coupling_term, rl_push_term, x, Δx, Δt, dist, r, γ, SK_DP,cut_off,do_random)
+    return SLOB(num_paths, T, p₀, M, L, D, nu, α, source_term, coupling_term, rl_push_term, randomness_term, x, Δx, Δt, γ, SK_DP,cut_off)
 end
 
-
-
-function to_real_time(simulation_time::Int, Δt::Float64) # from simulation time
+function to_real_time(simulation_time, Δt::Float64) # from simulation time
     return floor(Int, (floor(Int,simulation_time - 1)+1) * Δt)
 end
 
 
-function to_simulation_time(real_time::Int, Δt::Float64) #from real time 
+function to_simulation_time(real_time, Δt::Float64) #from real time 
     # if real_time = end time, this gives the total number of time indices in the simulation
     simulation_time = real_time / Δt
     return floor(Int, simulation_time + eps(simulation_time)) + 1 #how many simulation steps did it take to reach 'real_time'?
@@ -111,9 +106,13 @@ end
 #########################My own code below here########################
 # -
 
-function InteractOrderBooks(slob¹::SLOB,slob²::SLOB, seed::Int=-1, progress = false)#same but returns more stuff
+function InteractOrderBooks(slobs::Array{SLOB,1}, seed::Int=-1, progress = false)#same but returns more stuff
+    #handles change over paths logic
+    
+    slob = slobs[1]
+    
     if (progress==true)
-        p = Progress(slob¹.num_paths,dt=0.1)
+        p = Progress(slob.num_paths,dt=0.1)
     end
     
     # do some logging IDK
@@ -122,81 +121,145 @@ function InteractOrderBooks(slob¹::SLOB,slob²::SLOB, seed::Int=-1, progress = 
     
     # generate a set of seeds
     if seed == -1
-            seeds = Int.(rand(MersenneTwister(), UInt32, slob¹.num_paths))
+            seeds = Int.(rand(MersenneTwister(), UInt32, slob.num_paths))
         else
-            seeds = Int.(rand(MersenneTwister(seed), UInt32, slob¹.num_paths))
+            seeds = Int.(rand(MersenneTwister(seed), UInt32, slob.num_paths))
     end
     
     
-    time_steps = to_simulation_time(slob¹.T, slob¹.Δt) #how many time steps in the base simulation? i.e.Raw time indices
+    num_time_steps = to_simulation_time(slob.T, slob.Δt) #how many num_time steps in the base simulation? i.e.Raw num_time indices
+    
+    # the below dimensions are ordered according to the frequency with which they appear
+    
+    
+    outer_dict = Dict{Int64,Dict{Int64,DataPasser}}()
+    for path_num in 1:slob.num_paths
+        inner_dict = Dict{Int64,DataPasser}()
+        for slob_num in 1:length(slobs)
+            ### reserve memory
+            lob_densities =    zeros(Float64, slob.M+1, num_time_steps + 1)
+            sources =          zeros(Float64, slob.M+1, num_time_steps + 1)
+            couplings =        zeros(Float64, slob.M+1, num_time_steps + 1)
+            rl_pushes =        zeros(Float64, slob.M+1, num_time_steps + 1)
 
-    raw_price_paths¹ = ones(Float64, time_steps + 1, slob¹.num_paths)
-    raw_price_paths² = ones(Float64, time_steps + 1, slob².num_paths)
+            raw_price_paths =  ones(Float64,           num_time_steps + 1)
+            obs_price_paths =  ones(Float64,           slob.T         + 1)
 
-    obs_price_paths¹ = ones(Float64, slob¹.T + 1, slob¹.num_paths)
-    obs_price_paths² = ones(Float64, slob².T + 1, slob².num_paths)
+            P⁺s =              ones(Float64,           num_time_steps    )
+            P⁻s =              ones(Float64,           num_time_steps    )
+            Ps =               ones(Float64,           num_time_steps    )
+            V =                ones(Float64,           num_time_steps + 1)
 
-    lob_densities¹ = zeros(Float64, slob¹.M+1, time_steps + 1, slob¹.num_paths)#[x_entries,time t,path i]
-    lob_densities² = zeros(Float64, slob².M+1, time_steps + 1, slob².num_paths)#[x_entries,time t,path i]
+            my_struct = DataPasser(slobs[slob_num], lob_densities, sources, couplings, rl_pushes,
+                                    raw_price_paths, obs_price_paths,
+                                    P⁺s, P⁻s, Ps, V)
+                        #DataPasser(1)
+            ### end of reserve memory
+            
+            inner_dict[slob_num] = my_struct
+        end
+        
+        outer_dict[path_num] = inner_dict
+        
+    end
     
-    sources¹ = zeros(Float64, slob¹.M+1, time_steps + 1, slob¹.num_paths)#[x_entries,time t,path i]
-    sources² = zeros(Float64, slob².M+1, time_steps + 1, slob².num_paths)#[x_entries,time t,path i]
+    #print(outer_dict)
     
-    couplings¹ = zeros(Float64, slob¹.M+1, time_steps + 1, slob¹.num_paths)#[x_entries,time t,path i]
-    couplings² = zeros(Float64, slob².M+1, time_steps + 1, slob².num_paths)#[x_entries,time t,path i]
     
-    rl_pushes¹ = zeros(Float64, slob¹.M+1, time_steps + 1, slob¹.num_paths)#[x_entries,time t,path i]
-    rl_pushes² = zeros(Float64, slob².M+1, time_steps + 1, slob².num_paths)#[x_entries,time t,path i]
+    broke_points =     ones(Float64,             slob.num_paths)
     
-    P⁺s¹ = ones(Float64, time_steps, slob¹.num_paths)
-    P⁻s¹ = ones(Float64, time_steps, slob¹.num_paths)
-    Ps¹ = ones(Float64, time_steps, slob¹.num_paths)
-    V¹ = ones(Float64, time_steps+1, slob¹.num_paths)
+    recalc = slob.α > 0.0 
     
-    P⁺s² = ones(Float64, time_steps, slob².num_paths)
-    P⁻s² = ones(Float64, time_steps, slob².num_paths)
-    Ps² = ones(Float64, time_steps, slob².num_paths)
-    V² = ones(Float64, time_steps+1, slob².num_paths)
-    broke_points = ones(Float64, slob².num_paths)
+    #print(seeds[1]," ")
     
-    recalc = slob¹.α > 0.0 
-    
-    #for path in 1:slob¹.num_paths
     counter = 0
-    #lk = Threads.SpinLock()
-    #Threads.@threads for path = 1:slob¹.num_paths
-    for path = 1:slob¹.num_paths
+    for path_num = 1:slob.num_paths
         broke_point = -1;
-        Random.seed!(seeds[path])
+        Random.seed!(seeds[path_num])
         
-        @info "path $path with seed $(seeds[path])"
-        lob_densities¹[:, :, path], sources¹[:,:,path], couplings¹[:,:,path], rl_pushes¹[:,:,path],
-            raw_price_paths¹[:, path], obs_price_paths¹[:, path], 
-            P⁺s¹[:, path], P⁻s¹[:, path], Ps¹[:, path], V¹[:, path],
-        lob_densities²[:, :, path], sources²[:,:,path], couplings²[:,:,path], rl_pushes²[:,:,path],
-            raw_price_paths²[:, path], obs_price_paths²[:, path], 
-            P⁺s²[:, path], P⁻s²[:, path], Ps²[:, path], V²[:, path], broke_points[path] =
-        dtrw_solver(slob¹,slob², recalc)
+        @info "path $path_num with seed $(seeds[path_num])"
         
-        #lock(lk)
-        #try
-            counter += 1
-            if (progress==true)
-                next!(p)
-            end
-        #finally
-            #unlock(lk)
-        #end
+        dtrw_solver_fractional(outer_dict[path_num])
+       
+        counter += 1
+        if (progress==true)
+            next!(p)
+        end
     end
     
     if (progress==true)
         finish!(p)
     end
 
-    return   lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, obs_price_paths¹, P⁺s¹, P⁻s¹, Ps¹, V¹,
-             lob_densities², sources², couplings², rl_pushes², raw_price_paths², obs_price_paths², P⁺s², P⁻s², Ps², V², 
-             broke_points
+    return   outer_dict
 end
+
+# +
+outer1 = Dict(1:3 .=> 1:3)
+outer2 = Dict(1:3 .=> 1:3)
+
+
+outer = Dict(1:2 .=> (outer1,outer2))
+
+length(outer)
+
+
+# +
+# mutable struct DataPasser
+#     lob_densities::Array{Float64,2}
+#     sources::Array{Float64,2}
+#     couplings::Array{Float64,2}  
+#     rl_pushes::Array{Float64,2}
+#     raw_price_paths::Array{Float64,1}
+#     obs_price_paths::Array{Float64,1}
+#     P⁺s::Array{Float64,1}
+#     P⁻s::Array{Float64,1}
+#     Ps::Array{Float64,1} 
+#     V::Array{Float64,1}
+# end
+
+
+# outer_dict = Dict{Int64,Dict{Int64,DataPasser}}()
+
+# +
+d =   zeros(Float64, 200, 10000, 2, 10);
+function loop_over1()
+    for first in 1:size(d)[1]
+        for second in 1:size(d)[2]
+            for third in 1:size(d)[3]
+                for fourth in 1:size(d)[4]
+                    d[first,second,third,fourth]
+                end
+            end
+        end
+    end
+end
+
+function loop_over2()
+    for first in 1:size(d)[4]
+        for second in 1:size(d)[3]
+            for third in 1:size(d)[2]
+                for fourth in 1:size(d)[1]
+                    d[fourth,third,second,first]
+                end
+            end
+        end
+    end
+end
+# -
+
+@elapsed loop_over1()
+
+@elapsed loop_over2()
+
+# +
+a = zeros(Float64,2,3)
+
+b = @view a[1,:]
+
+b[3]=1
+
+a
 
 # +
 #SLOB(dict) = SLOB(

@@ -12,18 +12,27 @@ function CouplingTerm(μ::Float64, a::Float64, b::Float64, c::Float64)
 end
 
 # +
-function (it::CouplingTerm)(slob¹, φ_list¹, p_list¹, 
-                            slob², φ_list², p_list², 
-                            t)
+function (it::CouplingTerm)(D,
+                                 slob_num, t)
+    
+    #slob¹ = slobs[slob_num]
+    #p_list¹ = raw_price_paths[slob_num,:,path_num]
+    #φ_list¹ = lob_densities[slob_num,:,:,path_num]
+    #slob² = slobs[2+(1-slob_num)]
+    #p_list² = raw_price_paths[2+(1-slob_num),:,path_num]
+    #φ_list² = lob_densities[2+(1-slob_num),:,:,path_num]
     
     if (!(it.do_coupling))
-        return [0 for xᵢ¹ in slob¹.x] #for zero coupling
+        return [0 for xᵢ¹ in D[slob_num].slob.x] #for zero coupling
     end
     
     
     # extract most recent prices
-    p¹ = p_list¹[t-1]
-    p² = p_list²[t-1]
+    #p¹ = p_list¹[t-1]
+    #p² = p_list²[t-1]
+    
+    p¹ = D[slob_num].raw_price_paths[t-1]
+    p² = D[2+(1-slob_num)].raw_price_paths[t-1]
     
     function coupling_inner(x, p¹, p², t) 
         f(y)=-(it.μ*(y))*exp(-(it.μ*(y))^2) #y is a temporary variable
@@ -44,7 +53,7 @@ function (it::CouplingTerm)(slob¹, φ_list¹, p_list¹,
         end
     end
     
-    coupling¹ = [coupling_inner(xᵢ¹, p¹, p², t) for xᵢ¹ in slob¹.x]
+    coupling¹ = [coupling_inner(xᵢ¹, p¹, p², t) for xᵢ¹ in D[slob_num].slob.x]
     
 end
 # -
