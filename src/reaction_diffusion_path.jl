@@ -18,52 +18,78 @@ mutable struct SLOB
     γ::Float64 #Degree of fractional diffusion
     SK_DP::Array{Float64,1}
     cut_off::Int64
+    shift::Int64
+    old_way::Bool
+    michaels_way::Bool
+    scale::Float64
+    kernel_cut_off::Float64
 end
 
 
 function SLOB(num_paths::Int64, T::Int64, p₀::Float64,
     M::Int64, L::Real, D::Float64, nu::Float64,
     α::Float64, γ::Float64, 
-    source_term::SourceTerm, coupling_term::CouplingTerm, rl_push_term::RLPushTerm, randomness_term::RandomnessTerm) 
+    source_term::SourceTerm, coupling_term::CouplingTerm, rl_push_term::RLPushTerm, randomness_term::RandomnessTerm;
+    shift=0,old_way=false,michaels_way=false,scale=1.0,kernel_cut_off=0.001) 
     #translates convinient order into order expected by object itself
+    
+    #print("changed3")
     
     x₀ = p₀ - 0.5*L
     x_m = p₀ + 0.5*L
     #@assert x₀ >= 0
+    
     x = collect(Float64, range(x₀, stop=x_m, length=M+1)) #creates an array of the entries. So returns set of x points
     r = randomness_term.r
     Δx = L/M
-    Δt = (r * (Δx^2) / (2.0 * D))^(1/γ) #(Δx^2) / (2.0*D)
+    Δt = (r * (Δx^2) / (2.0 * D * scale))^(1/γ) #(Δx^2) / (2.0*D)
     
+    if old_way 
+        @assert nu*Δt<=1
+    else
+        #@assert exp(-nu*Δt)<=1
+    end
+    
+    SK_DP = calculate_modified_sibuya_kernel(γ,nu,T,Δt;shift=shift,kernel_cut_off=kernel_cut_off)
+    cut_off = length(SK_DP)
+    
+    return SLOB(num_paths, T, p₀, 
+        M, L, D, nu, α, 
+        source_term, coupling_term, rl_push_term, randomness_term, 
+        x, Δx, Δt, γ, SK_DP,
+        cut_off,shift,old_way,michaels_way,scale,kernel_cut_off)
+end
+
+function calculate_modified_sibuya_kernel(γ,nu,T,Δt;shift=0,kernel_cut_off=0.001)
     function partially_applied_Sibuya(n)
          return SibuyaKernelModified(n,γ,nu,Δt)
     end
-    
+
     l = to_simulation_time(T,Δt)
     SK_DP = zeros(Float64,l)
-    
+
     cut_off = 0
 
     # basic loop
-    next_sk = γ
-    SK_DP[cut_off+1] = next_sk*exp(-(cut_off+1)*nu*Δt)                                   
+    next_sk = γ #first value of kernel is just gamma
+    SK_DP[cut_off+1] = next_sk*exp(-(cut_off+1+shift)*nu*Δt)                                   
     cut_off += 1                                    
-    
+
     # special case for cut_off = 2
-    next_sk = (-1+γ)*(1-(2-γ)/(cut_off+1))
-    SK_DP[cut_off+1] = next_sk*exp(-(cut_off+1)*nu*Δt)                                   
-    
+    next_sk = (-1+γ)*(1-(2-γ)/(cut_off+1)) #evaluates to (-1+γ)*(γ/2)
+    SK_DP[cut_off+1] = next_sk*exp(-(cut_off+1+shift)*nu*Δt)                                   
+
     # check if latest meets condition to be included. Only then do we increase the cutoff and calculate again
-    while (cut_off<(l-1)) && (SK_DP[cut_off+1]<=-0.001)            
+    while (cut_off<(l-1)) && (SK_DP[cut_off+1]<=-kernel_cut_off)            
         cut_off += 1
-        
+
         next_sk = next_sk * (1-(2-γ)/(cut_off+1)) 
-        SK_DP[cut_off+1] = next_sk * exp(-(cut_off+1)*nu*Δt)                    
+        SK_DP[cut_off+1] = next_sk * exp(-(cut_off+1+shift)*nu*Δt)                    
     end
-   
+
     SK_DP = SK_DP[1:cut_off] #shorten the array to whatever cutoff was found
     
-    return SLOB(num_paths, T, p₀, M, L, D, nu, α, source_term, coupling_term, rl_push_term, randomness_term, x, Δx, Δt, γ, SK_DP,cut_off)
+    return SK_DP
 end
 
 function to_real_time(simulation_time, Δt::Float64) # from simulation time
@@ -118,10 +144,11 @@ end
 
 # +
 #########################My own code below here########################
-# -
 
+# +
 function InteractOrderBooks(slobs::Array{SLOB,1}, seed::Int=-1, progress = false)#same but returns more stuff
     #handles change over paths logic
+    #print(slobs[1].scale)
     
     slob = slobs[1]
     
@@ -188,9 +215,31 @@ function InteractOrderBooks(slobs::Array{SLOB,1}, seed::Int=-1, progress = false
     #print(seeds[1]," ")
     
     counter = 0
-    for path_num = 1:slob.num_paths
+#     function do_stuff(dict,path_num)
+#         broke_point = -1;
+#         Random.seed!(seeds[path_num])
+#         #print(Threads.threadid())
+        
+#         @info "path $path_num with seed $(seeds[path_num])"
+        
+#         dtrw_solver_fractional(dict)
+       
+#         counter += 1
+#         if (progress==true)
+#             next!(p)
+#         end
+#     end
+    
+    
+    #for path_num = 1:slob.num_paths
+    Threads.@threads for path_num in 1:slob.num_paths  
+    #Threads.@threads for (key,dict) in outer_dict  #paralellize over elements of dictionary? "dict" is the value in (key,value) and is an entire dictionary but for just one path
+        
+        #do_stuff(dict,key)
+        
         broke_point = -1;
         Random.seed!(seeds[path_num])
+        #print(Threads.threadid())
         
         @info "path $path_num with seed $(seeds[path_num])"
         

@@ -81,16 +81,73 @@ function SibuyaKernelDP(n,slob)
     return slob.SK_DP[n]
 end
 
+function calculate_next_step_original(φ, slob, P, P⁺, P⁻,net_source) #NB, pass in only most recent time
+    ###### LITERALLY Michael's code #####################################
+            
+    φ₋₁ = φ[1]
+    φ₊₁ = φ[end]
+    φ_next = zeros(Float64, size(φ,1))
+
+    φ_next[1] = P⁺ * φ₋₁ + P⁻ * φ[2] + P * φ[1] -
+        slob.nu * slob.Δt * φ[1] + slob.Δt * net_source[1]
+
+    φ_next[end] = P⁻ * φ₊₁ + P⁺ * φ[end-1] + P * φ[end] -
+        slob.nu * slob.Δt * φ[end] + slob.Δt * net_source[end]
+
+    φ_next[2:end-1] = P⁺ * φ[1:end-2] + P⁻ * φ[3:end] + P * φ[2:end-1] -
+        slob.nu * slob.Δt * φ[2:end-1] + slob.Δt * net_source[2:end-1]
+    
+    #####################################################################
+    
+    return φ_next
+end
+
+function calculate_next_step(φ, slob, P, P⁺, P⁻,net_source,
+                                t)
+    myend = size(φ,1)
+    φ_next = zeros(Float64,myend)
+    middle = 2:(myend-1)    #all indices excluding the first and last
+    
+    if (slob.old_way)&&(slob.shift==-1)&&(slob.cut_off==1)
+        Pm = P
+        removal_scale = - slob.nu * slob.Δt
+    else
+        Pm = P - 1                                
+        removal_scale = exp( - slob.nu * slob.Δt)
+    end
+
+    for tₘ in max(1,t-slob.cut_off):(t-1)
+
+        front = SibuyaKernelDP(t-tₘ,slob)
+
+        φ_next[1] += front * 
+            (  P⁺ * φ[1        ,tₘ] +   #1      -1    (but not because boundary)
+               P⁻ * φ[2        ,tₘ] +   #1      +1
+               Pm * φ[1        ,tₘ]  )  #1      +0 
+
+        φ_next[end] += front * 
+            (  P⁺ * φ[end-1    ,tₘ] +   #end    -1  
+               P⁻ * φ[end      ,tₘ] +   #end    +1    (but not because boundary)
+               Pm * φ[end      ,tₘ]  )  #end    +0
+
+        φ_next[middle] +=  front * 
+            (  P⁺ * φ[middle.-1,tₘ] +   #middle -1
+               P⁻ * φ[middle.+1,tₘ] +   #middle +1 
+               Pm * φ[middle   ,tₘ]  )  #middle +0 
+        
+    end
+    
+    φ_next += removal_scale * φ[:,t-1] + slob.Δt * net_source
+    
+    return φ_next
+end
+
 # +
-#function intra_time_period_simulate_fractional(slobs, φ_list, p_list, V_list,
-#                                                 t) 
 function intra_time_period_simulate_fractional( D,
                                                 t, slob_num) 
     slob = D[slob_num].slob
-    myend = size(D[slob_num].lob_densities[:,t-1],1) #end and myend are now the same in all the below
-    middle = 2:(myend-1) #all indices excluding the first and last
-
-    P, P⁺, P⁻, V_t  = D[slob_num].slob.randomness_term(D[slob_num].slob, D[slob_num].V, t) 
+    
+    P, P⁺, P⁻, V_t  = slob.randomness_term(slob, D[slob_num].V, t) 
 
     source   = slob.source_term(    D,
                                     slob_num, t) 
@@ -103,30 +160,17 @@ function intra_time_period_simulate_fractional( D,
 
     net_source = source .+ coupling .+ rl_push
 
-    φ_next = zeros(Float64,myend)
+    
+    if slob.michaels_way
+        ###### LITERALLY Michael's code #####################################
+        φ_next = calculate_next_step_original(D[slob_num].lob_densities[:,t-1], slob, P, P⁺, P⁻, net_source)
+        
+    else
+        # the newest version with fractional derivatives
+        φ_next = calculate_next_step(D[slob_num].lob_densities, slob, P, P⁺, P⁻, net_source, t) 
 
-    for t_m in max(1,t-D[slob_num].slob.cut_off):(t-1)
-
-        front = SibuyaKernelDP(t-t_m,D[slob_num].slob)
-
-        φ_next[1] += front * 
-            (  P⁺ * D[slob_num].lob_densities[1        ,t_m] + 
-               P⁻ * D[slob_num].lob_densities[2        ,t_m] + 
-               P  * D[slob_num].lob_densities[1        ,t_m]  ) 
-
-        φ_next[end] += front * 
-            (  P⁻ * D[slob_num].lob_densities[end      ,t_m] + 
-               P⁺ * D[slob_num].lob_densities[end-1    ,t_m] + 
-               P  * D[slob_num].lob_densities[end      ,t_m]  )
-
-        φ_next[middle] +=  front * 
-            (  P⁺ * D[slob_num].lob_densities[middle.-1,t_m] + 
-               P⁻ * D[slob_num].lob_densities[middle.+1,t_m] + 
-               P  * D[slob_num].lob_densities[middle   ,t_m]  )   
     end
-
-    φ_next +=  exp( - D[slob_num].slob.nu * slob.Δt) * D[slob_num].lob_densities[:,t-1] + slob.Δt * net_source
-
+        
     # store all those intermediate values
     D[slob_num].lob_densities[:,t] = φ_next
     D[slob_num].sources[:,t]       = source
@@ -147,21 +191,20 @@ function dtrw_solver_fractional(D) #handles change over time logic
     
     time_steps = to_simulation_time(slob.T, slob.Δt) 
     
+    
+    t = 1 #initial conditions take current t to read values
+
     for slob_num in 1:length(D)
          D[slob_num].raw_price_paths[1] = D[slob_num].slob.p₀
          D[slob_num].obs_price_paths[1] = D[slob_num].slob.p₀
+         initial_conditions_numerical( D, t, slob_num) 
     end
     
-    t = 1 #initial conditions take current t to read values
-    
-    for slob_num in 1:length(D)
-        initial_conditions_numerical( D, t, slob_num) 
-    end
     
     t = 2
     
-    #not_broke = true
     not_broke = reduce(&,[(D[l].raw_price_paths[t-1]!=-1 || !D[l].slob.source_term.do_source) for l in 1:length(D)],init=true) #only true when non of the most recent raw price values are -1
+    
     while (t <= time_steps) && (not_broke)
         for slob_num in 1:length(D)
             intra_time_period_simulate_fractional( D, t, slob_num) 

@@ -47,6 +47,7 @@ export  SLOB,
         clear_double_dict,
         plot_price_impact,
         foo,
-        SibuyaKernelModified
+        SibuyaKernelModified,
+        calculate_modified_sibuya_kernel
 
 end # module
