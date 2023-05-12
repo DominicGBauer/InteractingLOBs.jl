@@ -1058,12 +1058,13 @@ plot_sums(Dat)
 gammas = [1.0]#[1.0,0.9,0.8,0.7,0.6]#[1.0,0.9,0.8,0.7,0.6]
 volumes = range(1,100,length=100)
 
-function get_set_inner(volume,γ,do_michaels_way,ν)
+RealKickStartTime = 8 # when, in real time, to kick the system
+
+function get_set_inner(volume,γ,D,ν)
     Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
         
     l = Int(round(to_simulation_time(1,Δt)/3,digits=0))
 
-    RealKickStartTime = 8 # when, in real time, to kick the system
     SimKickStartTime = to_simulation_time(RealKickStartTime,Δt)-2 # convert to simulation time
 
     #myCouplingTerm = CouplingTerm(μ, a, b, c, false);
@@ -1110,6 +1111,8 @@ plot!()
 #png("/home/derickdiana/Desktop/Masters/Reworked/75ScaleWithRandom.png")
 #png("/home/derickdiana/Desktop/Masters/Reworked/ThreeWays.png")
 # -
+# # Price impact for different couplings
+
 # ## Stylized facts
 
 # +
