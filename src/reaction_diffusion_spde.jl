@@ -77,6 +77,48 @@ function extract_mid_price(slob, lob_density)
 end
 
 
+# +
+using Interpolations
+using Plots
+
+x = 1.0:1.0:10.0
+#y = @. cos(x^2 / 9.0)
+y = [1.0 for xi in x]
+y[3] = 10.0
+
+A = hcat(x,y)
+
+# +
+itps = Array{AbstractInterpolation}(undef,0)
+xs = Array{Vector{Float64}}(undef,0)
+ys = Array{Vector{Float64}}(undef,0)
+labels = Array{String}(undef,0)
+
+tfine = 1.0:0.1:10.0
+
+push!(itps,Interpolations.scale(interpolate(A, (BSpline(Linear()))), x, 1:2))
+push!(labels,"BSplit Linear Natural On Grid No Interp")
+
+push!(itps,Interpolations.scale(interpolate(A, (BSpline(Quadratic(Natural(OnGrid()))))), x, 1:2))
+push!(labels,"BSplit Quadratic Natural On Grid")
+
+push!(itps,Interpolations.scale(interpolate(A, (BSpline(Cubic(Natural(OnGrid()))))), x, 1:2))
+push!(labels,"BSplit Cubic Natural On Grid")
+
+
+
+for i in 1:length(itps)
+    push!(xs,[itps[i](t,1) for t in tfine])
+    push!(ys,[itps[i](t,2) for t in tfine])
+end 
+# -
+
+scatter(x, y, label="knots")
+for i in 1:length(itps)
+    plot!(xs[i], ys[i], label=labels[i],ls=:dash)
+end
+plot!(size=(1100,1100))
+
 function SibuyaKernelDP(n,slob)
     return slob.SK_DP[n]
 end
@@ -159,7 +201,6 @@ function intra_time_period_simulate_fractional( D,
                                     slob_num, t) 
 
     net_source = source .+ coupling .+ rl_push
-
     
     if slob.michaels_way
         ###### LITERALLY Michael's code #####################################
@@ -182,7 +223,21 @@ function intra_time_period_simulate_fractional( D,
     D[slob_num].V[t]               = V_t
 
 end
+# -
 
+
+function move_back_densities(D)
+    for slob_num in 1:length(D)
+        D[slob_num].lob_densities[:,1] = D[slob_num].lob_densities[:,2]
+        D[slob_num].sources[:,1]       = D[slob_num].sources[:,2]
+        D[slob_num].couplings[:,1]     = D[slob_num].couplings[:,2]
+        D[slob_num].rl_pushes[:,1]     = D[slob_num].rl_pushes[:,2]
+        D[slob_num].Ps[1]              = D[slob_num].Ps[2]
+        D[slob_num].P⁺s[1]             = D[slob_num].P⁺s[2]
+        D[slob_num].P⁻s[1]             = D[slob_num].P⁻s[2]
+        D[slob_num].V[1]               = D[slob_num].V[2]
+    end
+end
 
 # +
 function dtrw_solver_fractional(D) #handles change over time logic
@@ -205,13 +260,23 @@ function dtrw_solver_fractional(D) #handles change over time logic
     
     not_broke = reduce(&,[(D[l].raw_price_paths[t-1]!=-1 || !D[l].slob.source_term.do_source) for l in 1:length(D)],init=true) #only true when non of the most recent raw price values are -1
     
+    
     while (t <= time_steps) && (not_broke)
+        
+        if slob.store_past_densities
+            t_store = t
+        else 
+            move_back_densities(D)
+            t_store = 2
+        end
+            
         for slob_num in 1:length(D)
-            intra_time_period_simulate_fractional( D, t, slob_num) 
+            intra_time_period_simulate_fractional( D, t_store, slob_num) 
             
             D[slob_num].raw_price_paths[t] = 
                                     extract_mid_price(D[slob_num].slob, D[slob_num].lob_densities[:,t])
         end
+        
         
         t += 1 
         not_broke = reduce(&,[(D[l].raw_price_paths[t-1]!=-1 || !D[l].slob.source_term.do_source) for l in 1:length(D)],init=true)
@@ -230,9 +295,6 @@ function dtrw_solver_fractional(D) #handles change over time logic
     
 end
 # -
-
-test = [1,1,1,2]
-not_broke = reduce(&,[(test[l]!=2) for l in 1:length(test)],init=true)
 
 # # New Junk
 

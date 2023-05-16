@@ -23,6 +23,7 @@ mutable struct SLOB
     michaels_way::Bool
     scale::Float64
     kernel_cut_off::Float64
+    store_past_densities::Bool
 end
 
 
@@ -30,7 +31,7 @@ function SLOB(num_paths::Int64, T::Int64, p₀::Float64,
     M::Int64, L::Real, D::Float64, nu::Float64,
     α::Float64, γ::Float64, 
     source_term::SourceTerm, coupling_term::CouplingTerm, rl_push_term::RLPushTerm, randomness_term::RandomnessTerm;
-    shift=0,old_way=false,michaels_way=false,scale=1.0,kernel_cut_off=0.001) 
+    shift=0,old_way=false,michaels_way=false,scale=1.0,kernel_cut_off=0.001,store_past_densities=true) 
     #translates convinient order into order expected by object itself
     
     #print("changed3")
@@ -57,7 +58,7 @@ function SLOB(num_paths::Int64, T::Int64, p₀::Float64,
         M, L, D, nu, α, 
         source_term, coupling_term, rl_push_term, randomness_term, 
         x, Δx, Δt, γ, SK_DP,
-        cut_off,shift,old_way,michaels_way,scale,kernel_cut_off)
+        cut_off,shift,old_way,michaels_way,scale,kernel_cut_off,store_past_densities)
 end
 
 function calculate_modified_sibuya_kernel(γ,nu,T,Δt;shift=0,kernel_cut_off=0.001)
@@ -169,6 +170,11 @@ function InteractOrderBooks(slobs::Array{SLOB,1}, seed::Int=-1, progress = false
     
     
     num_time_steps = to_simulation_time(slob.T, slob.Δt) #how many num_time steps in the base simulation? i.e.Raw num_time indices
+    if slob.store_past_densities
+        num_time_steps_for_densities = num_time_steps 
+    else
+        num_time_steps_for_densities = 1
+    end
     
     # the below dimensions are ordered according to the frequency with which they appear
     
@@ -178,18 +184,18 @@ function InteractOrderBooks(slobs::Array{SLOB,1}, seed::Int=-1, progress = false
         inner_dict = Dict{Int64,DataPasser}()
         for slob_num in 1:length(slobs)
             ### reserve memory
-            lob_densities =    zeros(Float64, slob.M+1, num_time_steps + 1)
-            sources =          zeros(Float64, slob.M+1, num_time_steps + 1)
-            couplings =        zeros(Float64, slob.M+1, num_time_steps + 1)
-            rl_pushes =        zeros(Float64, slob.M+1, num_time_steps + 1)
+            lob_densities =    zeros(Float64, slob.M+1, num_time_steps_for_densities + 1)
+            sources =          zeros(Float64, slob.M+1, num_time_steps_for_densities + 1)
+            couplings =        zeros(Float64, slob.M+1, num_time_steps_for_densities + 1)
+            rl_pushes =        zeros(Float64, slob.M+1, num_time_steps_for_densities + 1)
 
-            raw_price_paths =  ones(Float64,           num_time_steps + 1)
-            obs_price_paths =  ones(Float64,           slob.T         + 1)
+            raw_price_paths =  ones(Float64,            num_time_steps               + 1)
+            obs_price_paths =  ones(Float64,            slob.T                       + 1)
 
-            P⁺s =              ones(Float64,           num_time_steps    )
-            P⁻s =              ones(Float64,           num_time_steps    )
-            Ps =               ones(Float64,           num_time_steps    )
-            V =                ones(Float64,           num_time_steps + 1)
+            P⁺s =              ones(Float64,            num_time_steps_for_densities    )
+            P⁻s =              ones(Float64,            num_time_steps_for_densities    )
+            Ps =               ones(Float64,            num_time_steps_for_densities    )
+            V =                ones(Float64,            num_time_steps_for_densities + 1)
 
             my_struct = DataPasser(slobs[slob_num], lob_densities, sources, couplings, rl_pushes,
                                     raw_price_paths, obs_price_paths,
@@ -257,16 +263,6 @@ function InteractOrderBooks(slobs::Array{SLOB,1}, seed::Int=-1, progress = false
 
     return   outer_dict
 end
-
-# +
-outer1 = Dict(1:3 .=> 1:3)
-outer2 = Dict(1:3 .=> 1:3)
-
-
-outer = Dict(1:2 .=> (outer1,outer2))
-
-length(outer)
-
 
 # +
 # mutable struct DataPasser

@@ -6,11 +6,12 @@ using StatsBase
 using Distributions
 using ProgressMeter
 using Statistics
-using Random
+using Random  
 using CurveFit
 import Random:rand
 using SpecialFunctions
 using JLD2
+using Combinatorics
 
 using InteractingLOBs
 
@@ -19,28 +20,47 @@ Revise.revise()
 # # USEFUL FUNCTIONS
 
 # +
-function get_sums(lob_densities)
+function get_sums(lob_densities;absolute=true)
     l = size(lob_densities)[2]
     sums = zeros(Float64, l)
     
+    if absolute 
+        my_sum = (x) -> sum(abs.(x))
+    else
+        my_sum = (x) -> sum(x)
+    end
+    
     for t in 1:l
-        sums[t] = sum(lob_densities[:,t])
+        sums[t] = my_sum(lob_densities[:,t])
     end
     
     return sums
 end
 
-function plot_sums(Dat;path_num=1,slob_num=1,new_plot=true)
+function save_png(folder_name,name)
+    png(string("/home/derickdiana/Desktop/Masters/",folder_name,"/",name,".png"))
+end
+
+function plot_sums(Dat;path_num=1,slob_num=1,new_plot=true,absolute=true)
     if new_plot
         plot()
     end
-    sums = get_sums(Dat[path_num][slob_num].lob_densities)
+    sums = get_sums(Dat[path_num][slob_num].lob_densities;absolute=absolute)
     slob = Dat[path_num][slob_num].slob
 
     scatter!(sums,markersize=1.4,label="Area",size=(1400,500))
     vline!([slob.rl_push_term.StartTime],label="Kick time")
-    hline!([-slob.Δt*slob.rl_push_term.Amount],label="Theoretical kick volume")
+    if absolute
+        hline!([sums[slob.rl_push_term.StartTime-1]+slob.Δt*slob.rl_push_term.Amount],label="Theoretical kick volume")
+    else
+        hline!([-slob.Δt*slob.rl_push_term.Amount],label="Theoretical kick volume")
+    end
+    
+    source_sums = get_sums(Dat[path_num][slob_num].sources;absolute=absolute)
+    hline!([source_sums[3]/slob.nu],label="Theoretical equilibrium volume")
+    
     plot!(xlabel="Simulation steps",ylabel="Signed area under system")
+    plot!(size=(1200,500))
 end
 
 path_to_plot = 1
@@ -156,9 +176,16 @@ function get_second_derivative(x,temp)
 end;
 
 function fit_and_plot_price_impact(volumes,mean_price_impacts,var_price_impacts,labels;
-                                                sub=-1,do_kinks=true,colors=-1,do_power_fit=false,xticks=-1,do_ribbon=true,new_plot=false)
+                                                sub=-1,do_kinks=true,colors=-1,do_power_fit=false,xticks=-1,new_plot=false,forplot=(),
+                                                do_ribbon=true,do_horiz_log_shift=false,do_log_fit=true,do_log_plot=false,do_vert_log_shift=true)
     if new_plot
         plot()
+    end
+    
+    volumes_original = volumes[:]
+    
+    if do_log_plot
+        volumes = log.(volumes.+1)[:]
     end
     
     #labels create indices which are usually the different gammas
@@ -178,17 +205,22 @@ function fit_and_plot_price_impact(volumes,mean_price_impacts,var_price_impacts,
         end
     end
     
+    shift = do_horiz_log_shift ? 1 : 0
+    
     for ind in 1:li_len
-        a,b = log_fit( volumes[sub] ,  mean_price_impacts[sub,ind] )
-        
-        plot!(         volumes[sub] ,  a.+b.*log.(volumes[sub]),
-                label=string("Log fit: ",round(a,digits=2)," + ",round(b,digits=2),"log(x)"),w=1.5,color=colors[ind])
+        if do_log_fit
+            a,b = log_fit( volumes_original[sub].+shift ,  mean_price_impacts[sub,ind] )
+            a = do_vert_log_shift ? a : 0
+            y_line_log_fit = a.+b.*log.(volumes_original[sub].+shift)
+
+            plot!(         volumes[sub] , y_line_log_fit ,
+                    label=string("Log fit: ",round(a,digits=2)," + ",round(b,digits=2),"log(x+1)"),w=1.5,color=colors[ind])
+        end
         
         scatter!(      volumes[sub],   mean_price_impacts[sub,ind],
                 label=labels[ind],ms=1.5,markerstrokewidth=0.1,  ma=1,color=colors[ind])
         
         if do_ribbon
-            
             plot!(     volumes[sub],   mean_price_impacts[sub,ind],  ribbon=var_price_impacts[sub,ind].^0.5,alpha=0,
                 fillalpha=0.4,fillcolor=colors[ind],label="")
         end
@@ -210,15 +242,14 @@ function fit_and_plot_price_impact(volumes,mean_price_impacts,var_price_impacts,
             vol_scale = (volumes[end]-volumes[1])/20
             impact_scale = (maximum(mean_price_impacts[sub,ind],dims=1)[1]-minimum(mean_price_impacts[sub,ind],dims=1)[1])/30
             
-            second_deriv = get_second_derivative(volumes[sub],mean_price_impacts[sub,ind])
+            second_deriv = get_second_derivative(volumes_original[sub],mean_price_impacts[sub,ind])
             kink_position = findnext(x->x>0,second_deriv,1)
             
             while !(kink_position===nothing)
                 target_x, target_y = (volumes[sub][kink_position+1],mean_price_impacts[sub[kink_position+1],ind])
-                #vline!([target_x],color=colors[ind],label=string("Kink at position ",round(volumes[sub][kink_position+1],digits=2)),ls=:dashdotdot)
-                #hline!([target_y],color=colors[ind],label="",ls=:dashdotdot)
                 quiver!([target_x+vol_scale],[target_y-impact_scale],quiver=([-vol_scale],[impact_scale]),color=colors[ind])
-                
+                scatter!([target_x],[target_y],markershape=:star5,color=colors[ind],
+                    label=string("Kink at position ",round(target_x,digits=2)),markerstrokewidth=0.1,  ma=1)
                 
                 kink_position = findnext(x->x>0,second_deriv,kink_position+2)
             end
@@ -226,7 +257,8 @@ function fit_and_plot_price_impact(volumes,mean_price_impacts,var_price_impacts,
 
     end
     
-    plot!(xlabel="Volume",ylabel="Price impact i.e. p(t+1)-p(t)")
+    my_xlabel = do_log_plot ? "log(Volume)" : Volume
+    plot!(xlabel=my_xlabel,ylabel="Price impact i.e. p(t+1)-p(t)";forplot...)
     plot!(size=(1000,1000))
 end
 
@@ -258,13 +290,13 @@ function calculate_price_impacts(volumes,inputs,get_set; measured_slob=1) #lob_s
     input_len = length(inputs)
 
     mean_price_impacts = ones(Float64,vol_len,input_len)
-    var_price_impacts = ones(Float64,vol_len,input_len)
+    var_price_impacts  = ones(Float64,vol_len,input_len)
 
     for Ind in 1:input_len 
         p_outer = Progress(vol_len,dt=0.1)
         
-        for Volume in 1:vol_len
-        #Threads.@threads for Volume in 1:vol_len  
+        #for Volume in 1:vol_len
+        Threads.@threads for Volume in 1:vol_len  
             lob_models, sim_start_time, l  = get_set(volumes[Volume],inputs[Ind])
 
             #try clear_double_dict(Dat) catch e print("Not initialized") end
@@ -309,6 +341,14 @@ function mymean(p,x,Δx)
 end
 
 # -
+
+function myfunc(a,args...;b=1,argz...)
+    return args[1]
+end
+function myfunc2(a,args...;b=1,argz...)
+    return myfunc(9,args...)
+end
+myfunc2(8,2,3)
 
 # # GENERAL WORKING
 
@@ -384,15 +424,15 @@ Dat = InteractOrderBooks([lob_model¹,lob_model²], -1, true) ;
 
 # +
 #total_steps = min(to_simulation_time(T,Δt),100)
-total_steps = 100
+total_steps = 10
 total_length = to_simulation_time(T,Δt)
 step = floor(Int,total_length/total_steps)
 
-myrange = 1:step:(total_length-step)
-#myrange = [SimStartTime:SimStartTime+to_sim(1)*2;]
-#myrange = [SimStartTime]
+range = 1:step:(total_length-step)
+#range = [SimStartTime:SimStartTime+to_sim(1)*2;]
+#range = [SimStartTime]
 
-p_outer = Progress(length(myrange),dt=0.1)
+p_outer = Progress(length(range),dt=0.1)
 
 l = @layout [a d; b e; c f];
 
@@ -406,17 +446,16 @@ anim = @animate for s = myrange           #s is the time in simulation time
         plt5 = plot_price_path(s,r,1,Dat,true)
     end
     
-    
-    plt2 = plot_density_visual(s, r, 1, Dat;x_axis_width=L/6)
+    plt2 = plot_density_visual(s, r, 1, Dat)
     if length(Dat[1])>1
-        plt4 = plot_density_visual(s, r, 2, Dat;x_axis_width=L/6)
-        plt6 = plot_density_visual(s, r, 1, Dat; dosum=true, plot_raw_price=false, x_axis_width=L/6)
+        plt4 = plot_density_visual(s, r, 2, Dat)
+        plt6 = plot_density_visual(s, r, 1, Dat; dosum=true, plot_raw_price=false)
     end
     
     if length(Dat[1])>1
         plot(plt1, plt2, plt3, plt4, plt5, plt6 ,layout=l,size=(1000,1000))
     else
-        plot(plt1,plt2,size=(1200,1000))
+        plot(plt1,plt2,size=(1000,1000))
     end
     
     next!(p_outer)
@@ -852,8 +891,6 @@ plot!()
 # -
 # # NO RANDOM KICKS PRICE IMPACTS
 
-# ## Price impact for different gamma
-
 # +
 # Configuration Arguments
 num_paths = 1#50#30
@@ -870,8 +907,8 @@ D = 0.5#0.5/8 # real diffusion constant e.g. D=1 (meters^2 / second), 1
 #ν = 3.0 #removal rate
 #γ = 1.0 #fraction of derivative (1 is normal diffusion, less than 1 is D^{1-γ} derivative on the RHS)
 
-ν = 2.0#3.0 #removal rate
-γ = 0.6#1.0 #fraction of derivative (1 is normal diffusion, less than 1 is D^{1-γ} derivative on the RHS)
+ν = 1.0#1.0#3.0 #removal rate
+γ = 1.0 #fraction of derivative (1 is normal diffusion, less than 1 is D^{1-γ} derivative on the RHS)
 
 # Source term:
 λ = 1.0 #
@@ -900,121 +937,8 @@ myRandomnessTerm = RandomnessTerm(σ,r,β,lag,do_random_walk,false)
 T = 20
 RealKickStartTime = 8 # when, in real time, to kick the system
 SimKickStartTime = to_simulation_time(RealKickStartTime,Δt)-2 # convert to simulation time
-Position = -2 
-Volume = 10
-
-myRLPusherPush = RLPushTerm(SimKickStartTime,SimKickStartTime+1,Position,Volume,true)
-myRLPusherNoPush = RLPushTerm(SimKickStartTime,SimKickStartTime+1,Position,Volume,false)
-
-lob_model_push = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
-        mySourceTerm, myCouplingTerm, myRLPusherPush,myRandomnessTerm,shift=0,old_way=false);
-
-lob_model_no_push = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
-        mySourceTerm, myCouplingTerm, myRLPusherNoPush,myRandomnessTerm,shift=0,old_way=true);
-
-print((Δt,to_simulation_time(T,Δt),num_paths*to_simulation_time(T,Δt))) #about 2GB RAM per 100K, i.e. can only do about 1.8 million
-lob_model_push.SK_DP
-
-# +
-Dat = quick_plot([lob_model_push,lob_model_no_push],SimKickStartTime,12)
-
-#png("/home/derickdiana/Desktop/Masters/Reworked/KickTheSytem.png")
-plot!()
-# -
-
-
-plot_sums(Dat)
-
-# +
-#volumes = exp.(range(log(1),log(10000),length=100))
-
-volumes = range(1,4000,length=100)
-gammas = [1.0,0.9,0.8,0.7,0.6]#[1.0,0.9,0.8,0.7,0.6]#[1.0,0.9,0.8,0.7,0.6]#[1.0,0.9,0.8,0.7,0.6]
-
-RealKickStartTime = 8 # when, in real time, to kick the system
-ν = 2.0
-
-function get_set(volume,γ)  
-    Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
-        
-    l = Int(round(to_simulation_time(1,Δt)/3,digits=0))
-        
-    SimKickStartTime = to_simulation_time(RealKickStartTime,Δt)-2 # convert to simulation time
-
-    #myCouplingTerm = CouplingTerm(μ, a, b, c, false);
-
-    myRLPusherPush = RLPushTerm(SimKickStartTime,SimKickStartTime+1,Position,volume,true)
-    myRLPusherNoPush = RLPushTerm(SimKickStartTime,SimKickStartTime+1,Position,volume,false)
-
-    lob_model_push = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
-        mySourceTerm, myCouplingTerm, myRLPusherPush,myRandomnessTerm);
-
-    lob_model_no_push = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
-        mySourceTerm, myCouplingTerm, myRLPusherNoPush,myRandomnessTerm);
-    
-    return ([lob_model_push, lob_model_no_push], SimKickStartTime, l)
-end
-# -
-
-(mean_price_impacts_frac_no_random,var_price_impacts_frac_no_random) = calculate_price_impacts(volumes,gammas,get_set);
-
-# +
-labels = map(x->string("Data for alpha = ",x),gammas)
-
-fit_and_plot_price_impact(volumes,mean_price_impacts_frac_no_random,var_price_impacts_frac_no_random,labels;do_kinks=true,new_plot=true)
-# -
-
-# ## Price impact for different D and nu
-
-# +
-# Configuration Arguments
-num_paths = 1#50#30
-
-L = 200     # real system width (e.g. 200 meters)
-M = 400     # divided into M pieces , 400
-
-p₀ = 230.0  #this is the mid_price at t=0  238.75 
-
-# Free-Parameters for gaussian version
-D = 0.5#0.5/8 # real diffusion constant e.g. D=1 (meters^2 / second), 1
-α = 0.0 # legacy, no longer used
-
-#ν = 3.0 #removal rate
-#γ = 1.0 #fraction of derivative (1 is normal diffusion, less than 1 is D^{1-γ} derivative on the RHS)
-
-ν = 0.1#1.0#3.0 #removal rate
-ν = 1.0#3.0 #removal rate
-γ = 1.0 #fraction of derivative (1 is normal diffusion, less than 1 is D^{1-γ} derivative on the RHS)
-
-# Source term:
-λ = 1.0 #
-μ = 0.1 #
-mySourceTerm = SourceTerm(λ, μ, true);
-
-# Coupling term:
-a = 0.01  #gap between stocks before at full strength: strong is 0.3
-b = 2.0   #weighting of interaction term: strong is 2
-c = 2.0   #skew factor: strong is 2
-
-myCouplingTerm = CouplingTerm(μ, a, b, c, true);
-
-# My randomness term
-σ = 1.0 #variance in randomness
-r = 0.5 #proportion of time in which it jumps left or right
-β = 0.0 #probability of being the value of the previous lag or mean reversion strength
-lag = 10 #lag
-do_random_walk = false #behave like a random walk
-myRandomnessTerm = RandomnessTerm(σ,r,β,lag,do_random_walk,false)
-
-Δx = L / M  # real gap between simulation points 
-Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
-
-# RL Stuff:
-T = 20
-RealKickStartTime = 8 # when, in real time, to kick the system
-SimKickStartTime = to_simulation_time(RealKickStartTime,Δt)-2 # convert to simulation time
-Position = -2 
-Volume = 10
+Position = -1 
+Volume = 10#10
 
 myRLPusherPush = RLPushTerm(SimKickStartTime,SimKickStartTime+1,Position,Volume,true)
 myRLPusherNoPush = RLPushTerm(SimKickStartTime,SimKickStartTime+1,Position,Volume,false)
@@ -1033,7 +957,7 @@ lob_model_push.SK_DP
 if true
     myCouplingTerm = CouplingTerm(μ, a, b, c, false);
     
-    Volume = 10
+    Volume = 100
 
     myRLPusherPush = RLPushTerm(SimKickStartTime,SimKickStartTime+1,Position,Volume,true)
     myRLPusherNoPush = RLPushTerm(SimKickStartTime,SimKickStartTime+1,Position,Volume,false)
@@ -1044,7 +968,7 @@ if true
     lob_model_no_push = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
         mySourceTerm, myCouplingTerm, myRLPusherNoPush,myRandomnessTerm,shift=-1,michaels_way=true);
     
-    quick_plot([lob_model_push,lob_model_no_push],SimKickStartTime,12)
+    Dat = quick_plot([lob_model_push,lob_model_no_push],SimKickStartTime,12)
     
     #png("/home/derickdiana/Desktop/Masters/Reworked/KickTheSytemWithRemoval.png")
     #png("/home/derickdiana/Desktop/Masters/Reworked/NumericalInstabilityForLargeRemovalRate.png")
@@ -1054,64 +978,235 @@ end
 
 plot_sums(Dat)
 
-# +
-gammas = [1.0]#[1.0,0.9,0.8,0.7,0.6]#[1.0,0.9,0.8,0.7,0.6]
-volumes = range(1,100,length=100)
+# ## Price impact for different D, gamma and nu
 
-RealKickStartTime = 8 # when, in real time, to kick the system
+# +
+function get_set(volume,combined_slice)
+    D = combined_slice[1]
+    ν = combined_slice[2]
+    γ = combined_slice[3]
+    return get_set_inner(volume,γ,D,ν)
+end
 
 function get_set_inner(volume,γ,D,ν)
     Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
-        
-    l = Int(round(to_simulation_time(1,Δt)/3,digits=0))
-
+    #l = Int(round(to_simulation_time(1,Δt)/3,digits=0))
+    l = 50
     SimKickStartTime = to_simulation_time(RealKickStartTime,Δt)-2 # convert to simulation time
 
-    #myCouplingTerm = CouplingTerm(μ, a, b, c, false);
+    myRLPusherPush   = RLPushTerm(SimKickStartTime, SimKickStartTime+1, Position, volume,  true)
+    myRLPusherNoPush = RLPushTerm(SimKickStartTime, SimKickStartTime+1, Position, volume, false)
 
-    myRLPusherPush = RLPushTerm(SimKickStartTime,SimKickStartTime+1,Position,volume,true)
-    myRLPusherNoPush = RLPushTerm(SimKickStartTime,SimKickStartTime+1,Position,volume,false)
+    lob_model_push    = SLOB(num_paths, RealKickStartTime+to_real_time(l,Δt)+1, p₀, M, L, D, ν, α, γ,
+        mySourceTerm, myCouplingTerm, myRLPusherPush,   myRandomnessTerm);
 
-    lob_model_push = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
-        mySourceTerm, myCouplingTerm, myRLPusherPush,myRandomnessTerm, michaels_way = do_michaels_way);
+    lob_model_no_push = SLOB(num_paths, RealKickStartTime+to_real_time(l,Δt)+1, p₀, M, L, D, ν, α, γ,
+        mySourceTerm, myCouplingTerm, myRLPusherNoPush, myRandomnessTerm);
+    
+    return ([lob_model_push, lob_model_no_push], SimKickStartTime, l)
+    
+end;
+# -
 
-    lob_model_no_push = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
-        mySourceTerm, myCouplingTerm, myRLPusherNoPush,myRandomnessTerm, michaels_way = do_michaels_way);
+
+# ### Change Ds
+
+# +
+volumes = range(1,100,length=100)
+
+#what to try
+nus = [2.0]
+ds = [0.2,0.5,1.0,1.5]
+gammas = [1.0]
+#all combinations of the above
+combined = collect(Iterators.product(nus,ds,gammas))[:]
+
+(mean_price_impacts,var_price_impacts) = calculate_price_impacts(volumes,  combined,   get_set)
+# -
+my_labels = map(c -> string("Data: nu=",c[1]," and D=",c[2]),combined)
+for Gamma in 1:length(gammas)
+    fit_and_plot_price_impact(volumes,mean_price_impacts,var_price_impacts,my_labels;colors=["red","green","blue","purple"],new_plot=true,
+        forplot=(legend=:bottomright,yticks=range(0,1,step=L/M)))
+end
+plot!()
+
+# ### Change nu's
+
+# +
+volumes = range(1,100,length=100)
+
+#what to try
+ds = [1.0]
+nus = [0.8,1.5,2.0,2.5]
+gammas = [1.0]
+#all combinations of the above
+combined = collect(Iterators.product(nus,ds,gammas))[:]
+
+(mean_price_impacts,var_price_impacts) = calculate_price_impacts(volumes,  combined,   get_set)
+# -
+
+my_labels = map(c -> string("Data: nu=",c[1]," and D=",c[2]),combined)
+for Gamma in 1:length(gammas)
+    fit_and_plot_price_impact(volumes,mean_price_impacts,var_price_impacts,my_labels;colors=["red","green","blue","purple"],new_plot=true,
+        forplot=(legend=:bottomright,yticks=range(-2,10,step=L/M)))
+end
+plot!()
+# ### Change gamma's
+
+# ### Change gammas
+
+# +
+volumes = range(1,5000,length=100)
+
+#what to try
+ds = [1.0]
+nus = [1.0]
+gammas = [1.0,0.9,0.8,0.7]
+#all combinations of the above
+combined = collect(Iterators.product(nus,ds,gammas))[:]
+
+(mean_price_impacts,var_price_impacts) = calculate_price_impacts(volumes,  combined,   get_set)
+# -
+my_labels = map(c -> string("Data: gamma=",c[3]),combined)
+for Gamma in 1:length(gammas)
+    fit_and_plot_price_impact(volumes,mean_price_impacts,var_price_impacts,my_labels;colors=["red","green","blue","purple"],new_plot=true,
+        forplot=(legend=:bottomright,))
+end
+plot!()
+
+# ## Price impact for different delays
+
+# +
+function get_set(volume,combined_slice)
+    l = combined_slice[1]
+    return get_set_inner(volume,l)
+end
+
+function get_set_inner(volume,l)
+    L = 200
+    M = 400
+    ν = 0.5
+    Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
+    #l = Int(round(to_simulation_time(1,Δt)/3,digits=0))
+    SimKickStartTime = to_simulation_time(RealKickStartTime,Δt)-2 # convert to simulation time
+
+    myRLPusherPush   = RLPushTerm(SimKickStartTime, SimKickStartTime+1, -1, volume,  true)
+    myRLPusherNoPush = RLPushTerm(SimKickStartTime, SimKickStartTime+1, -1, volume, false)
+
+    lob_model_push    = SLOB(num_paths, RealKickStartTime+to_real_time(l,Δt)+1, p₀, M, L, D, ν, α, γ,
+        mySourceTerm, myCouplingTerm, myRLPusherPush,   myRandomnessTerm);
+
+    lob_model_no_push = SLOB(num_paths, RealKickStartTime+to_real_time(l,Δt)+1, p₀, M, L, D, ν, α, γ,
+        mySourceTerm, myCouplingTerm, myRLPusherNoPush, myRandomnessTerm);
+    
+    return ([lob_model_push, lob_model_no_push], SimKickStartTime, l)
+    
+end
+# -
+
+
+# #### Structure of kinks
+
+# +
+#volumes = range(0.1,10000,length=100)
+#volumes = exp.(range(log(0.1),log(1000),length=100))
+volumes = exp.(range(log(1),log(20000),length=10000))
+
+#what to try
+ls = [4,5]#1:5
+#all combinations of the above
+combined = collect(Iterators.product(ls))[:]
+
+(mean_price_impacts,var_price_impacts) = calculate_price_impacts(volumes,  combined,   get_set)
+# +
+my_labels = map(l -> string("Data: l=",l[1]),combined)
+
+fit_and_plot_price_impact(volumes,mean_price_impacts,var_price_impacts,my_labels;
+    new_plot=true,do_shift=true,forplot=(legend=:bottomright,yticks=range(0,5,step=1/2)),do_log_fit=true,do_log_plot=true,do_log_shift=true)
+hline!([1/2*mi for mi in 1:6],color="black",linewidth=0.3)
+
+
+#save_png("Reworked","SubstructureToKinksLog")
+plot!()
+# -
+
+# #### Many different delays
+
+# +
+#volumes = range(0.1,10000,length=100)
+#volumes = exp.(range(log(0.1),log(100),length=1000))
+volumes = exp.(range(-1,13,length=1000))
+#volumes = exp.(range(log(0.1),log(1000),length=1000))
+#volumes = exp.(range(log(1),log(10000),length=10000))
+
+#what to try
+ls = 1:7
+#all combinations of the above
+combined = collect(Iterators.product(ls))[:]
+
+(mean_price_impacts,var_price_impacts) = calculate_price_impacts(volumes,  combined,   get_set)
+# +
+my_labels = map(l -> string("Data: l=",l[1]),combined)
+
+fit_and_plot_price_impact(volumes,mean_price_impacts,var_price_impacts,my_labels;
+    new_plot=true,forplot=(legend=:topleft,yticks=range(0,5,step=1/2),
+    xticks=range(0,100,step=1)),do_log_fit=true,do_log_plot=true,do_vert_log_shift=true,do_horiz_log_shift=true)
+hline!([1/2*mi for mi in 0:6],color="black",linewidth=0.3)
+#save_png("Reworked","KinksAsFunctionOfDelayLog")
+
+plot!()
+# -
+
+# ## Price impact for different divisions of space
+
+# +
+function get_set(volume,combined_slice)
+    M = combined_slice[1]
+    return get_set_inner(volume,M)
+end
+
+function get_set_inner(volume,M)
+    D = 0.7
+    Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
+    #l = Int(round(to_simulation_time(1,Δt)/3,digits=0))
+    #l = 3
+    l = 100
+    SimKickStartTime = to_simulation_time(RealKickStartTime,Δt)-2 # convert to simulation time
+
+    myRLPusherPush   = RLPushTerm(SimKickStartTime, SimKickStartTime+1, Position, volume,  true)
+    myRLPusherNoPush = RLPushTerm(SimKickStartTime, SimKickStartTime+1, Position, volume, false)
+
+    lob_model_push    = SLOB(num_paths, RealKickStartTime + to_real_time(l,Δt) + 1, p₀, M, L, D, ν, α, γ,
+        mySourceTerm, myCouplingTerm, myRLPusherPush,   myRandomnessTerm);
+
+    lob_model_no_push = SLOB(num_paths, RealKickStartTime + to_real_time(l,Δt) + 1, p₀, M, L, D, ν, α, γ,
+        mySourceTerm, myCouplingTerm, myRLPusherNoPush, myRandomnessTerm);
     
     return ([lob_model_push, lob_model_no_push], SimKickStartTime, l)
     
 end
 
-function get_set(volume,γ)
-    return get_set_inner(volume,γ,true,2.0)
-end
-(mean_price_impacts_frac_no_random_michaels_way,var_price_impacts_frac_no_random_michaels_way) = calculate_price_impacts(volumes,gammas,get_set)
-
-function get_set(volume,γ)
-    return get_set_inner(volume,γ,false,2.0)
-end
-(mean_price_impacts_frac_no_random_new_way,var_price_impacts_frac_no_random_new_way) = calculate_price_impacts(volumes,gammas,get_set)
-
-function get_set(volume,γ)
-    return get_set_inner(volume,γ,true,2.0*6/10)
-end
-(mean_price_impacts_frac_no_random_nu_adjust_michaels_way,var_price_impacts_frac_no_random_nu_adjust_michaels_way) = calculate_price_impacts(volumes,gammas,get_set);
-
 
 # +
-for Gamma in 1:length(gammas)
-    fit_and_plot_price_impact(volumes,mean_price_impacts_frac_no_random_michaels_way,var_price_impacts_frac_no_random_michaels_way,["Michaels with nu=2"];colors=["blue"],new_plot=true)
-    fit_and_plot_price_impact(volumes,mean_price_impacts_frac_no_random_new_way,var_price_impacts_frac_no_random_new_way,["New way with nu=2"];colors=["red"])
-    fit_and_plot_price_impact(volumes,mean_price_impacts_frac_no_random_nu_adjust_michaels_way,var_price_impacts_frac_no_random_nu_adjust_michaels_way,["Michaels moved closer to new way by setting nu = 1.3"];colors=["green"])
-end
-plot!()
+#volumes = range(0.1,10000,length=100)
+volumes = exp.(range(log(1),log(10),length=100))
 
-#png("/home/derickdiana/Desktop/Masters/Reworked/PriceImpactFractionalAdaptiveDelayOnlyNoRandom.png")
-#png("/home/derickdiana/Desktop/Masters/Reworked/PriceImpactMichaelsCode.png")
-#png("/home/derickdiana/Desktop/Masters/Reworked/75ScaleWithRandom.png")
-#png("/home/derickdiana/Desktop/Masters/Reworked/ThreeWays.png")
+#what to try
+ms = [400,800,1600]#[100,200,400,800]
+#all combinations of the above
+combined = collect(Iterators.product(ms))[:]
+
+(mean_price_impacts,var_price_impacts) = calculate_price_impacts(volumes,  combined,   get_set)
+# +
+my_labels = map(l -> string("Data: l=",l[1]),combined)
+
+fit_and_plot_price_impact(volumes,mean_price_impacts,var_price_impacts,my_labels;new_plot=true,do_shift=true,
+    forplot=(legend=:bottomright,))
+
+plot!()
 # -
-# # Price impact for different couplings
+
+# ## Price impact for different couplings
 
 # ## Stylized facts
 
