@@ -1,19 +1,6 @@
 # -*- coding: utf-8 -*-
-using Revise
-using Plots
-using RelevanceStacktrace
-using StatsBase 
-using Distributions
-using ProgressMeter
-using Statistics
-using Random  
-using CurveFit
+using Revise ,Plots, RelevanceStacktrace, StatsBase, Distributions, ProgressMeter, Statistics, Random, CurveFit, SpecialFunctions, Combinatorics, InteractingLOBs, JLD2
 import Random:rand
-using SpecialFunctions
-using JLD2
-using Combinatorics
-
-using InteractingLOBs
 
 Revise.revise()
 
@@ -23,22 +10,22 @@ Revise.revise()
 function get_sums(lob_densities;absolute=true)
     l = size(lob_densities)[2]
     sums = zeros(Float64, l)
-    
-    if absolute 
+
+    if absolute
         my_sum = (x) -> sum(abs.(x))
     else
         my_sum = (x) -> sum(x)
     end
-    
+
     for t in 1:l
         sums[t] = my_sum(lob_densities[:,t])
     end
-    
+
     return sums
 end
 
 function save_png(folder_name,name)
-    png(string("/home/derickdiana/Desktop/Masters/",folder_name,"/",name,".png"))
+    png(string("/Users/dominic/Desktop/personal-projects/InteractingLOBs.jl/",folder_name,"/",name,".png"))
 end
 
 function plot_sums(Dat;path_num=1,slob_num=1,new_plot=true,absolute=true)
@@ -55,10 +42,10 @@ function plot_sums(Dat;path_num=1,slob_num=1,new_plot=true,absolute=true)
     else
         hline!([-slob.Δt*slob.rl_push_term.Amount],label="Theoretical kick volume")
     end
-    
+
     source_sums = get_sums(Dat[path_num][slob_num].sources;absolute=absolute)
     hline!([source_sums[3]/slob.nu],label="Theoretical equilibrium volume")
-    
+
     plot!(xlabel="Simulation steps",ylabel="Signed area under system")
     plot!(size=(1200,500))
 end
@@ -68,7 +55,7 @@ l = @layout [a d; b e; c f];
 
 function plot_price_path(s, r, lob_num, Dat, diff=false)
     lob_model = Dat[1][lob_num].slob
-    
+
     plt = plot()
     for path in 1:lob_model.num_paths
         raw_price_paths = Dat[path][lob_num].raw_price_paths[1:s]
@@ -76,23 +63,23 @@ function plot_price_path(s, r, lob_num, Dat, diff=false)
             raw_price_paths .-=  Dat[path][3-lob_num].raw_price_paths[1:s]
         end
         plot!((0:s-1).*lob_model.Δt,raw_price_paths ,color=5,w=0.6) ;
-        
+
     end
-    
+
     obs_price_paths = Dat[path_to_plot][lob_num].obs_price_paths[1:r]
     if diff
         obs_price_paths .-=  Dat[path_to_plot][3-lob_num].obs_price_paths[1:r]
     end
     plot!(0:r-1, obs_price_paths,color=1,w=2.7) ;
-    
-    plot!(legend=false, ylab="Price", xlab="Time") ;   
+
+    plot!(legend=false, ylab="Price", xlab="Time") ;
     return plt
 end
 
-function plot_density_visual(s, r, lob_num, Dat; 
+function plot_density_visual(s, r, lob_num, Dat;
                 dosum=false, plot_raw_price=true, x_axis_width = -1, center = -2, scale_down=true, marker_size=1.6,overall_alpha=[1.0,1.0,1.0,1.0,1.0])
     lob_model = Dat[1][lob_num].slob
-    
+
     # the below just ensure we see the full graph (100-myp)% of the time
     #myp = 10
     #num_time_steps = to_simulation_time(T,Δt)
@@ -103,63 +90,63 @@ function plot_density_visual(s, r, lob_num, Dat;
     #    max_y² = percentile( [maximum(Dat[path_to_plot][2].lob_densities[:,i]) for i in 1:num_time_steps] , 100-myp)
     #    min_y² = percentile( [minimum(Dat[path_to_plot][2].lob_densities[:,i]) for i in 1:num_time_steps] , myp);
     #end
-    
+
     mult = Dat[1][lob_num].slob.Δt
-    
+
     if center == -1
         center = Dat[1][lob_num].raw_price_paths[s]
     end
-    
+
     if center == -2
         center = lob_model.p₀
     end
-    
+
     if x_axis_width==-1
         x_axis_width = Dat[1][lob_num].slob.L/8
     end
-    
+
     if Dat[1][lob_num].slob.old_way
         removal_fraction = - Dat[1][lob_num].slob.nu * Dat[1][lob_num].slob.Δt
     else
         removal_fraction = exp(-Dat[1][lob_num].slob.nu * Dat[1][lob_num].slob.Δt) - 1
     end
-    
+
     x_axis  = [center-x_axis_width,center+x_axis_width]
-    
+
     lob_densities = Dat[path_to_plot][lob_num].lob_densities[:,s]
     couplings = Dat[path_to_plot][lob_num].couplings[:,s]
     sources = Dat[path_to_plot][lob_num].sources[:,s]
     rl_pushes = Dat[path_to_plot][lob_num].rl_pushes[:,s]
-    
+
     if dosum
         lob_densities .+= Dat[path_to_plot][3-lob_num].lob_densities[:,s]
         couplings .+= Dat[path_to_plot][3-lob_num].couplings[:,s]
         sources .+= Dat[path_to_plot][3-lob_num].sources[:,s]
         rl_pushes .+= Dat[path_to_plot][3-lob_num].rl_pushes[:,s]
     end
-    
-    plt = plot(lob_model.x,                lob_densities, color=1,label="Density",alpha = overall_alpha[1]); 
+
+    plt = plot(lob_model.x,                lob_densities, color=1,label="Density",alpha = overall_alpha[1]);
     plot!(lob_model.x,               mult.*couplings, color=2, label="Coupling",alpha = overall_alpha[2]) ;
     plot!(lob_model.x,               mult.*sources, color=3, label="Source",alpha = overall_alpha[3]) ;
     plot!(lob_model.x,   removal_fraction.*lob_densities, color=5, label="Removal",alpha = overall_alpha[4]) ;
     plot!(lob_model.x,               mult.*rl_pushes, color=4, label="RL",alpha = overall_alpha[5]) ;
-    
-    scatter!(lob_model.x,                lob_densities, color=1,label="",markersize=marker_size,markerstrokewidth=0.0,alpha = overall_alpha[1]); 
+
+    scatter!(lob_model.x,                lob_densities, color=1,label="",markersize=marker_size,markerstrokewidth=0.0,alpha = overall_alpha[1]);
     scatter!(lob_model.x,               mult.*couplings, color=2, label="",markersize=marker_size,markerstrokewidth=0.0,alpha = overall_alpha[2]) ;
     scatter!(lob_model.x,               mult.*sources, color=3, label="",markersize=marker_size,markerstrokewidth=0.0,alpha = overall_alpha[3]) ;
     scatter!(lob_model.x,   removal_fraction.*lob_densities, color=5, label="",markersize=marker_size,markerstrokewidth=0.0,alpha = overall_alpha[4]) ;
     scatter!(lob_model.x,               mult.*rl_pushes, color=4, label="",markersize=marker_size,markerstrokewidth=0.0,alpha = overall_alpha[5]) ;
-    
+
     if (plot_raw_price)
         if (isinteger(s*lob_model.Δt))
             mycol = :black
-        else 
+        else
             mycol = 1
         end
-        
+
         scatter!([Dat[path_to_plot][lob_num].raw_price_paths[s]],[0],label="Midprice",markercolor=mycol, markersize=3,markerstrokewidth=0.5)
     end
-    
+
     real_time = round(lob_model.Δt * s,digits=3)
     #plot!(lob_model.x, x -> 0,color="black", primary=false) ; #draw horizontal line
     #plot!( legend=:bottomleft, title="time=$r", xlab="Price", ylab="LOB&Source",ylim=[min_y¹,max_y¹],xlim=x_axis)
@@ -181,22 +168,22 @@ function fit_and_plot_price_impact(volumes,mean_price_impacts,var_price_impacts,
     if new_plot
         plot()
     end
-    
+
     volumes_original = volumes[:]
-    
+
     if do_log_plot
         volumes = log.(volumes.+1)[:]
     end
-    
+
     #labels create indices which are usually the different gammas
-    
+
     li_len = length(labels)
     vi_len = length(volumes)
-    
+
     if sub==-1
         sub = 1:vi_len
     end
-    
+
     if colors==-1 #change later!
         if li_len<=5
             colors = ["blue","red","green","orange","purple"]
@@ -204,9 +191,9 @@ function fit_and_plot_price_impact(volumes,mean_price_impacts,var_price_impacts,
             colors = 1:li_len
         end
     end
-    
+
     shift = do_horiz_log_shift ? 1 : 0
-    
+
     for ind in 1:li_len
         if do_log_fit
             a,b = log_fit( volumes_original[sub].+shift ,  mean_price_impacts[sub,ind] )
@@ -216,23 +203,23 @@ function fit_and_plot_price_impact(volumes,mean_price_impacts,var_price_impacts,
             plot!(         volumes[sub] , y_line_log_fit ,
                     label=string("Log fit: ",round(a,digits=2)," + ",round(b,digits=2),"log(x+1)"),w=1.5,color=colors[ind])
         end
-        
+
         scatter!(      volumes[sub],   mean_price_impacts[sub,ind],
                 label=labels[ind],ms=1.5,markerstrokewidth=0.1,  ma=1,color=colors[ind])
-        
+
         if do_ribbon
             plot!(     volumes[sub],   mean_price_impacts[sub,ind],  ribbon=var_price_impacts[sub,ind].^0.5,alpha=0,
                 fillalpha=0.4,fillcolor=colors[ind],label="")
         end
-        
+
         if do_power_fit
             c,d = power_fit(volumes[sub],mean_price_impacts[sub,ind])
-            
+
             plot!(volumes[sub],        c.*((volumes[sub]).^d),label="Power fit",
                         w=1.5,color=colors[ind],linestyle=:dash)
         end
 
-            
+
         if xticks!=-1
             plot!(xticks=xticks)
         end
@@ -241,22 +228,22 @@ function fit_and_plot_price_impact(volumes,mean_price_impacts,var_price_impacts,
         if do_kinks
             vol_scale = (volumes[end]-volumes[1])/20
             impact_scale = (maximum(mean_price_impacts[sub,ind],dims=1)[1]-minimum(mean_price_impacts[sub,ind],dims=1)[1])/30
-            
+
             second_deriv = get_second_derivative(volumes_original[sub],mean_price_impacts[sub,ind])
             kink_position = findnext(x->x>0,second_deriv,1)
-            
+
             while !(kink_position===nothing)
                 target_x, target_y = (volumes[sub][kink_position+1],mean_price_impacts[sub[kink_position+1],ind])
                 quiver!([target_x+vol_scale],[target_y-impact_scale],quiver=([-vol_scale],[impact_scale]),color=colors[ind])
                 scatter!([target_x],[target_y],markershape=:star5,color=colors[ind],
                     label=string("Kink at position ",round(target_x,digits=2)),markerstrokewidth=0.1,  ma=1)
-                
+
                 kink_position = findnext(x->x>0,second_deriv,kink_position+2)
             end
         end
 
     end
-    
+
     my_xlabel = do_log_plot ? "log(Volume)" : Volume
     plot!(xlabel=my_xlabel,ylabel="Price impact i.e. p(t+1)-p(t)";forplot...)
     plot!(size=(1000,1000))
@@ -266,37 +253,37 @@ function quick_plot(lob_models,sim_start_time,how_many=12; center_at_midprice=tr
         dosum=false, plot_raw_price=true, x_axis_width = -1, center = -2, scale_down=true, marker_size=1.6,overall_alpha=[1.0,1.0,1.0,1.0,1.0])
     try clear_double_dict(Dat) catch e print("Not initialized") end
     GC.gc()
-    
+
     Dat = InteractOrderBooks(lob_models, -1, true) ;
-    
+
     if x_axis_width==-1
         x_axis_width=10#lob_models[1].L/8
     end
-    
+
     p_arr1 = Array{Plots.Plot{Plots.GRBackend},1}(undef,how_many)
     for i in [1:how_many;]
-        p_arr1[i] = plot_density_visual(sim_start_time-2+i, to_real_time(sim_start_time-2+i,Δt), 1, Dat; 
+        p_arr1[i] = plot_density_visual(sim_start_time-2+i, to_real_time(sim_start_time-2+i,Δt), 1, Dat;
             dosum=dosum, plot_raw_price=plot_raw_price, x_axis_width = x_axis_width, center = center, scale_down=scale_down, marker_size=marker_size, overall_alpha=overall_alpha )#,overall_alpha=[0.4,1.0,0.4,0.4,0.4,0.4])
     end
     plot(p_arr1...,size=(1200,1000))
-    
+
     return Dat
 end
 
 function calculate_price_impacts(volumes,inputs,get_set; measured_slob=1) #lob_sets must have the form ((lob_a1,lob_b1),(lob_a2,lob_b2)) where the inner brackets are meant
                                                                                 #to be passed to InteractOrderBooks together
-    
+
     vol_len = length(volumes)
     input_len = length(inputs)
 
     mean_price_impacts = ones(Float64,vol_len,input_len)
     var_price_impacts  = ones(Float64,vol_len,input_len)
 
-    for Ind in 1:input_len 
+    for Ind in 1:input_len
         p_outer = Progress(vol_len,dt=0.1)
-        
+
         #for Volume in 1:vol_len
-        Threads.@threads for Volume in 1:vol_len  
+        Threads.@threads for Volume in 1:vol_len
             lob_models, sim_start_time, l  = get_set(volumes[Volume],inputs[Ind])
 
             #try clear_double_dict(Dat) catch e print("Not initialized") end
@@ -319,7 +306,7 @@ function calculate_price_impacts(volumes,inputs,get_set; measured_slob=1) #lob_s
     end
 
     mean_price_impacts = .- mean_price_impacts;
-    
+
     return (mean_price_impacts,var_price_impacts)
 end
 
@@ -360,7 +347,7 @@ L = 200     # real system width (e.g. 200 meters)
 M = 400     # divided into M pieces , 400
 
 T = 2000  # simulation runs until real time T (e.g. 80 seconds)
-p₀ = 230.0  #this is the mid_price at t=0  238.75 
+p₀ = 230.0  #this is the mid_price at t=0  238.75
 
 # Free-Parameters for gaussian version
 D = 0.5 # real diffusion constant e.g. D=1 (meters^2 / second), 1
@@ -391,7 +378,7 @@ do_random_walk = false #behave like a random walk
 myRandomnessTerm = RandomnessTerm(σ,r,β,lag,do_random_walk,true)
 
 
-Δx = L / M  # real gap between simulation points 
+Δx = L / M  # real gap between simulation points
 Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
 
 # RL Stuff:
@@ -405,7 +392,7 @@ myRLPusher1 = RLPushTerm(SimStartTime,SimEndTime,Position,Volume,true)
 
 myRLPusher2 = RLPushTerm(SimStartTime,SimEndTime,Position,Volume,false)
 
-lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ, 
+lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
     mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
 
 lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
@@ -439,25 +426,25 @@ l = @layout [a d; b e; c f];
 anim = @animate for s = myrange           #s is the time in simulation time
     r = to_real_time(s, lob_model¹.Δt)  #r is the time in real time
     #s = to_simulation_time(r, lob_model¹.Δt)  #s is the time in real time
-    
+
     plt1 = plot_price_path(s,r,1,Dat)
     if length(Dat[1])>1
         plt3 = plot_price_path(s,r,2,Dat)
         plt5 = plot_price_path(s,r,1,Dat,true)
     end
-    
+
     plt2 = plot_density_visual(s, r, 1, Dat)
     if length(Dat[1])>1
         plt4 = plot_density_visual(s, r, 2, Dat)
         plt6 = plot_density_visual(s, r, 1, Dat; dosum=true, plot_raw_price=false)
     end
-    
+
     if length(Dat[1])>1
         plot(plt1, plt2, plt3, plt4, plt5, plt6 ,layout=l,size=(1000,1000))
     else
         plot(plt1,plt2,size=(1000,1000))
     end
-    
+
     next!(p_outer)
 end
 
@@ -475,7 +462,7 @@ L = 200     # real system width (e.g. 200 meters)
 M = 400     # divided into M pieces , 400
 
 T = 10000  # simulation runs until real time T (e.g. 80 seconds)
-p₀ = 230.0  #this is the mid_price at t=0  238.75 
+p₀ = 230.0  #this is the mid_price at t=0  238.75
 
 # Free-Parameters for gaussian version
 D = 0.5 # real diffusion constant e.g. D=1 (meters^2 / second), 1
@@ -499,7 +486,7 @@ myCouplingTerm = CouplingTerm(μ, a, b, c, true);
 
 
 
-Δx = L / M  # real gap between simulation points 
+Δx = L / M  # real gap between simulation points
 Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
 
 # RL Stuff:
@@ -569,7 +556,7 @@ do_random_walk = false #behave like a random walk
 myRandomnessTerm = RandomnessTerm(σ,r,β,lag,do_random_walk,true)
 T = 20000
 
-lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ, 
+lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
     mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
 
 lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
@@ -602,7 +589,7 @@ do_random_walk = true #behave like a random walk
 myRandomnessTerm = RandomnessTerm(σ,r,β,lag,do_random_walk,true)
 T = 20000
 
-lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ, 
+lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
     mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
 
 lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
@@ -636,7 +623,7 @@ do_random_walk = true #behave like a random walk
 myRandomnessTerm = RandomnessTerm(σ,r,β,lag,do_random_walk,true)
 T = 20000
 
-lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ, 
+lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
     mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
 
 lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
@@ -675,7 +662,7 @@ L = 200     # real system width (e.g. 200 meters)
 M = 400     # divided into M pieces , 400
 
 T = 10000  # simulation runs until real time T (e.g. 80 seconds)
-p₀ = 230.0  #this is the mid_price at t=0  238.75 
+p₀ = 230.0  #this is the mid_price at t=0  238.75
 
 # Free-Parameters for gaussian version
 D = 0.5 # real diffusion constant e.g. D=1 (meters^2 / second), 1
@@ -705,7 +692,7 @@ lag = 10 #lag
 do_random_walk = true #behave like a random walk
 myRandomnessTerm = RandomnessTerm(σ,r,β,lag,do_random_walk,true)
 
-Δx = L / M  # real gap between simulation points 
+Δx = L / M  # real gap between simulation points
 Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
 
 # RL Stuff:
@@ -717,7 +704,7 @@ Volume = -8; # If position == -x where x>=0, then put it x above the mid price e
 
 myRLPusher = RLPushTerm(SimStartTime,SimEndTime,Position,Volume,false)
 
-lob_model = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ, 
+lob_model = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
     mySourceTerm, myCouplingTerm, myRLPusher, myRandomnessTerm);
 
 print((Δt,to_simulation_time(T,Δt),num_paths*to_simulation_time(T,Δt))) #about 2GB RAM per 100K, i.e. can only do about 1.8 million
@@ -752,7 +739,7 @@ num_paths = 1#50#30
 L = 200     # real system width (e.g. 200 meters)
 M = 400     # divided into M pieces , 400
 
-p₀ = 230.0  #this is the mid_price at t=0  238.75 
+p₀ = 230.0  #this is the mid_price at t=0  238.75
 
 # Free-Parameters for gaussian version
 D = 0.5#0.5/8 # real diffusion constant e.g. D=1 (meters^2 / second), 1
@@ -785,14 +772,14 @@ lag = 10 #lag
 do_random_walk = false #behave like a random walk
 myRandomnessTerm = RandomnessTerm(σ,r,β,lag,do_random_walk,false)
 
-Δx = L / M  # real gap between simulation points 
+Δx = L / M  # real gap between simulation points
 Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
 
 # RL Stuff:
 T = 20
 RealKickStartTime = 8 # when, in real time, to kick the system
 SimKickStartTime = to_simulation_time(RealKickStartTime,Δt)-2 # convert to simulation time
-Position = -2 
+Position = -2
 Volume = 10
 
 myRLPusherPush = RLPushTerm(SimKickStartTime,SimKickStartTime+1,Position,Volume,true)
@@ -811,20 +798,20 @@ lob_model_push.SK_DP
 # check something actually happens for one example
 if true
     myCouplingTerm = CouplingTerm(μ, a, b, c, false);
-    
+
     Volume = 10
 
     myRLPusherPush = RLPushTerm(SimKickStartTime,SimKickStartTime+1,Position,Volume,true)
     myRLPusherNoPush = RLPushTerm(SimKickStartTime,SimKickStartTime+1,Position,Volume,false)
-    
+
     lob_model_push = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
         mySourceTerm, myCouplingTerm, myRLPusherPush,myRandomnessTerm,shift=-1,michaels_way=true);
-    
+
     lob_model_no_push = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
         mySourceTerm, myCouplingTerm, myRLPusherNoPush,myRandomnessTerm,shift=-1,michaels_way=true);
-    
+
     quick_plot([lob_model_push,lob_model_no_push],SimKickStartTime,12)
-    
+
     #png("/home/derickdiana/Desktop/Masters/Reworked/KickTheSytemWithRemoval.png")
     #png("/home/derickdiana/Desktop/Masters/Reworked/NumericalInstabilityForLargeRemovalRate.png")
     plot!()
@@ -836,10 +823,11 @@ plot_sums(Dat)
 # +
 gammas = [1.0]#[1.0,0.9,0.8,0.7,0.6]#[1.0,0.9,0.8,0.7,0.6]
 volumes = range(1,100,length=100)
+myscale = 1 #not sure what this should be
 
 function get_set_inner(volume,γ,do_michaels_way,ν)
     Δt = (r * (Δx^2) / (2.0 * D * myscale))^(1/γ)
-        
+
     l = Int(round(to_simulation_time(1,Δt)/3,digits=0))
 
     RealKickStartTime = 8 # when, in real time, to kick the system
@@ -855,9 +843,9 @@ function get_set_inner(volume,γ,do_michaels_way,ν)
 
     lob_model_no_push = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
         mySourceTerm, myCouplingTerm, myRLPusherNoPush,myRandomnessTerm, michaels_way = do_michaels_way);
-    
+
     return ([lob_model_push, lob_model_no_push], SimKickStartTime, l)
-    
+
 end
 
 function get_set(volume,γ)
@@ -898,7 +886,7 @@ num_paths = 1#50#30
 L = 200     # real system width (e.g. 200 meters)
 M = 400     # divided into M pieces , 400
 
-p₀ = 230.0  #this is the mid_price at t=0  238.75 
+p₀ = 230.0  #this is the mid_price at t=0  238.75
 
 # Free-Parameters for gaussian version
 D = 0.5#0.5/8 # real diffusion constant e.g. D=1 (meters^2 / second), 1
@@ -930,14 +918,14 @@ lag = 10 #lag
 do_random_walk = false #behave like a random walk
 myRandomnessTerm = RandomnessTerm(σ,r,β,lag,do_random_walk,false)
 
-Δx = L / M  # real gap between simulation points 
+Δx = L / M  # real gap between simulation points
 Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
 
 # RL Stuff:
 T = 20
 RealKickStartTime = 8 # when, in real time, to kick the system
 SimKickStartTime = to_simulation_time(RealKickStartTime,Δt)-2 # convert to simulation time
-Position = -1 
+Position = -1
 Volume = 10#10
 
 myRLPusherPush = RLPushTerm(SimKickStartTime,SimKickStartTime+1,Position,Volume,true)
@@ -956,20 +944,20 @@ lob_model_push.SK_DP
 # check something actually happens for one example
 if true
     myCouplingTerm = CouplingTerm(μ, a, b, c, false);
-    
+
     Volume = 100
 
     myRLPusherPush = RLPushTerm(SimKickStartTime,SimKickStartTime+1,Position,Volume,true)
     myRLPusherNoPush = RLPushTerm(SimKickStartTime,SimKickStartTime+1,Position,Volume,false)
-    
+
     lob_model_push = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
         mySourceTerm, myCouplingTerm, myRLPusherPush,myRandomnessTerm,shift=-1,michaels_way=true);
-    
+
     lob_model_no_push = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
         mySourceTerm, myCouplingTerm, myRLPusherNoPush,myRandomnessTerm,shift=-1,michaels_way=true);
-    
+
     Dat = quick_plot([lob_model_push,lob_model_no_push],SimKickStartTime,12)
-    
+
     #png("/home/derickdiana/Desktop/Masters/Reworked/KickTheSytemWithRemoval.png")
     #png("/home/derickdiana/Desktop/Masters/Reworked/NumericalInstabilityForLargeRemovalRate.png")
     plot!()
@@ -1002,9 +990,9 @@ function get_set_inner(volume,γ,D,ν)
 
     lob_model_no_push = SLOB(num_paths, RealKickStartTime+to_real_time(l,Δt)+1, p₀, M, L, D, ν, α, γ,
         mySourceTerm, myCouplingTerm, myRLPusherNoPush, myRandomnessTerm);
-    
+
     return ([lob_model_push, lob_model_no_push], SimKickStartTime, l)
-    
+
 end;
 # -
 
@@ -1098,9 +1086,9 @@ function get_set_inner(volume,l)
 
     lob_model_no_push = SLOB(num_paths, RealKickStartTime+to_real_time(l,Δt)+1, p₀, M, L, D, ν, α, γ,
         mySourceTerm, myCouplingTerm, myRLPusherNoPush, myRandomnessTerm);
-    
+
     return ([lob_model_push, lob_model_no_push], SimKickStartTime, l)
-    
+
 end
 # -
 
@@ -1181,9 +1169,9 @@ function get_set_inner(volume,M)
 
     lob_model_no_push = SLOB(num_paths, RealKickStartTime + to_real_time(l,Δt) + 1, p₀, M, L, D, ν, α, γ,
         mySourceTerm, myCouplingTerm, myRLPusherNoPush, myRandomnessTerm);
-    
+
     return ([lob_model_push, lob_model_no_push], SimKickStartTime, l)
-    
+
 end
 
 
@@ -1212,13 +1200,13 @@ plot!()
 
 # +
 # Configuration Arguments
-T = 10000 
-num_paths = 1 
+T = 10000
+num_paths = 1
 
 L = 200     # real system width (e.g. 200 meters)
 M = 400     # divided into M pieces , 400
 
-p₀ = 230.0  #this is the mid_price at t=0  238.75 
+p₀ = 230.0  #this is the mid_price at t=0  238.75
 
 # Free-Parameters for gaussian version
 D = 0.5 # real diffusion constant e.g. D=1 (meters^2 / second), 1
@@ -1231,14 +1219,14 @@ dist = Normal(0.0,σ) #dist = TDist(1) #dist = Spl(1);
 
 # Source term:
 λ = 1.0
-μ = 0.1 
+μ = 0.1
 
 mySourceTerm = SourceTerm(λ, μ, true);
 
 # Coupling term:
 myCouplingTerm = CouplingTerm(0.0, 0.0, 0.0, 0.0, false);
 
-Δx = L / M  # real gap between simulation points 
+Δx = L / M  # real gap between simulation points
 Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
 
 # My randomness term
@@ -1257,7 +1245,7 @@ Position = 0
 
 myRLPusher = RLPushTerm(SimStartTime,SimEndTime,Position,Volume,false)
 
-lob_model = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ, 
+lob_model = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
     mySourceTerm, myCouplingTerm, myRLPusher, myRandomnessTerm);
 
 print((Δt,to_simulation_time(T,Δt),num_paths*to_simulation_time(T,Δt))) #about 2GB RAM per 100K, i.e. can only do about 1.8 million
@@ -1294,7 +1282,7 @@ num_paths = 1#30
 L = 200     # real system width (e.g. 200 meters)
 M = 400     # divided into M pieces , 400
 
-p₀ = 230.0  #this is the mid_price at t=0  238.75 
+p₀ = 230.0  #this is the mid_price at t=0  238.75
 
 # Free-Parameters for gaussian version
 D = 0.4 # real diffusion constant e.g. D=1 (meters^2 / second), 1
@@ -1318,7 +1306,7 @@ do_random_walk = false #behave like a random walk
 myRandomnessTerm = RandomnessTerm(σ,r,β,lag,do_random_walk,false)
 
 
-Δx = L / M  # real gap between simulation points 
+Δx = L / M  # real gap between simulation points
 Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
 
 # RL Stuff:
@@ -1330,7 +1318,7 @@ Volume = -80; # If position == -x where x>=0, then put it x above the mid price 
 myRLPusher = RLPushTerm(SimKickStartTime,SimKickStartTime+1,Position,Volume,true)
 
 T = 1000
-lob_model = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ, 
+lob_model = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
     mySourceTerm, myCouplingTerm, myRLPusher, myRandomnessTerm,kernel_cut_off=0.000001);
 
 RealKickStartTime = to_real_time(lob_model.cut_off,Δt) # when, in real time, to kick the system
@@ -1341,7 +1329,7 @@ Volume = -80; # If position == -x where x>=0, then put it x above the mid price 
 myRLPusher = RLPushTerm(SimKickStartTime,SimKickStartTime+1,Position,Volume,true)
 
 T = RealKickStartTime+1
-lob_model = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ, 
+lob_model = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
     mySourceTerm, myCouplingTerm, myRLPusher, myRandomnessTerm,kernel_cut_off=0.000001);
 
 MinRealKickStartTime = RealKickStartTime# when, in real time, to kick the system. Starts late to give system time to relax. Must be latest of all the gammas to try
@@ -1381,7 +1369,7 @@ how_long = 20
 min_Δt = minimum(delta_ts,dims=1)[1]
 sim_how_long = to_simulation_time(how_long,min_Δt)
 
-lob_model = SLOB(num_paths, T, p₀, M, L, D, ν, α, minimum(gamma_indices,dims=1)[1], 
+lob_model = SLOB(num_paths, T, p₀, M, L, D, ν, α, minimum(gamma_indices,dims=1)[1],
     mySourceTerm, myCouplingTerm, myRLPusher, myRandomnessTerm,kernel_cut_off=0.000001);
 MinRealKickStartTime = to_real_time(lob_model.cut_off,min_Δt) + 1# when, in real time, to kick the system. Starts late to give system time to relax. Must be latest of all the gammas to try
 
@@ -1392,27 +1380,27 @@ sums = zeros(Float64,gi_len,sim_how_long-1)
 for Gamma in 1:gi_len
     γ = gamma_indices[Gamma] #fraction of derivative (1 is normal diffusion, less than 1 is D^{1-γ} derivative on the RHS)
     Δt = delta_ts[Gamma]
-    
+
     RealKickStartTime = max(26,MinRealKickStartTime)
     SimKickStartTime = to_simulation_time(RealKickStartTime,Δt)-2 # convert to simulation time
 
     myRLPusher = RLPushTerm(SimKickStartTime,SimKickStartTime+1,Position,-8,true)
-    
+
     lob_model = SLOB(num_paths, RealKickStartTime+how_long+1, p₀, M, L, D, ν, α, γ,
         mySourceTerm, myCouplingTerm, myRLPusher, myRandomnessTerm; shift=-1 , kernel_cut_off=0.000001 )
-    
+
     try clear_double_dict(Dat) catch e print("Not initialized") end
     GC.gc()
 
-    Dat = InteractOrderBooks([lob_model], -1, true) 
-    
+    Dat = InteractOrderBooks([lob_model], -1, true)
+
     sim_how_long = to_simulation_time(how_long,delta_ts[Gamma])
     for t in 1:sim_how_long-1
         temp = Dat[1][1].lob_densities[:,SimKickStartTime+t] #across all x values, at time "t",  on path 1
         sums[Gamma,t] = sum(temp)
         variances[Gamma,t] = myvar(temp./sum(temp),lob_model.x,lob_model.Δx)
     end
-    
+
 end
 
 # +
@@ -1432,7 +1420,7 @@ for Gamma in 1:gi_len
         plot!(real_time,(2*D)/gamma(1+gamma_indices[Gamma]).*real_time.^gamma_indices[Gamma],label=string("Theoretical fit for alpha=",gamma_indices[Gamma]," is y=",round((2*D)/gamma(1+gamma_indices[Gamma]),digits=2),"t^",gamma_indices[Gamma]),ls=:solid,color=Gamma)
         plot!(real_time,a.*real_time.^b,label=string("Numeric fit for alpha=",gamma_indices[Gamma]," is y=",round(a,digits = 2),"t^",round(b,digits=2)),ls=:dash,color=Gamma)
     end
-        
+
     #plt2 = plot(sums[Gamma,sub],label=string("Area underneath has myrange ",maximum(sums[sub]) - minimum(sums[sub])),color="red",ylim=[0.99999,1.00001])
     #plot!(plt1, plt2, layout=l2, size=(700,700),xlab="Time")
 end
@@ -1451,7 +1439,7 @@ num_paths = 1#30
 L = 200     # real system width (e.g. 200 meters)
 M = 400     # divided into M pieces , 400
 
-p₀ = 230.0  #this is the mid_price at t=0  238.75 
+p₀ = 230.0  #this is the mid_price at t=0  238.75
 
 # Free-Parameters for gaussian version
 D = 0.5#0.5/8 # real diffusion constant e.g. D=1 (meters^2 / second), 1
@@ -1482,7 +1470,7 @@ lag = 10 #lag
 do_random_walk = false #behave like a random walk
 myRandomnessTerm = RandomnessTerm(σ,r,β,lag,do_random_walk,false)
 
-Δx = L / M  # real gap between simulation points 
+Δx = L / M  # real gap between simulation points
 Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
 
 # RL Stuff:
@@ -1493,7 +1481,7 @@ Volume = 20
 
 myRLPusher = RLPushTerm(SimKickStartTime,SimKickStartTime+8,Position,Volume,true)
 
-lob_model = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ, 
+lob_model = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
     mySourceTerm, myCouplingTerm, myRLPusher, myRandomnessTerm,shift=-1,old_way=true);
 
 print((Δt,to_simulation_time(T,Δt),num_paths*to_simulation_time(T,Δt))) #about 2GB RAM per 100K, i.e. can only do about 1.8 million
@@ -1504,24 +1492,24 @@ lob_model.SK_DP
 if true
     try clear_double_dict(Dat) catch e print("Not initialized") end
     GC.gc()
-    
-    lob_model = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ, 
+
+    lob_model = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
         mySourceTerm, myCouplingTerm, myRLPusher, myRandomnessTerm,michaels_way=true);
     TrulyOldWay = InteractOrderBooks([lob_model], -1, true) ;
-    
-    lob_model = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ, 
+
+    lob_model = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
         mySourceTerm, myCouplingTerm, myRLPusher, myRandomnessTerm,michaels_way=false,shift=-1,old_way=true);
     DatSpecialCase = InteractOrderBooks([lob_model], -1, true) ;
-    
-    lob_model = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ, 
+
+    lob_model = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
         mySourceTerm, myCouplingTerm, myRLPusher, myRandomnessTerm,michaels_way=false,shift=0,old_way=false);
     DatNewWayWithNoShift = InteractOrderBooks([lob_model], -1, true) ;
-    
-    lob_model = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ, 
+
+    lob_model = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
         mySourceTerm, myCouplingTerm, myRLPusher, myRandomnessTerm,michaels_way=false,shift=-1,old_way=false);
     DatNewWayWithShift = InteractOrderBooks([lob_model], -1, true) ;
 
-    
+
     sub_x = Int(3M/8):Int(5*M/8)
     how_many = 1
     p_arr1 = Array{Plots.Plot{Plots.GRBackend},1}(undef,how_many)
@@ -1529,22 +1517,22 @@ if true
     #start_pos = to_simulation_time(T,Δt) - how_many - 1
     for i in [start_pos:(start_pos+how_many-1);]
         #p_arr1[i] = plot_density_visual(SimKickStartTime-2+i, to_real_time(SimKickStartTime-2+i,Δt), 1, Dat,false, true, 10, Dat[1][1].raw_price_paths[SimKickStartTime])
-        
+
         plot()
         plot(TrulyOldWay[1][1].slob.x[sub_x], TrulyOldWay[1][1].lob_densities[sub_x,i], color=1,ls=:solid,lw=3,label="Old way (Michael's code exactly)");
         plot!(DatSpecialCase[1][1].slob.x[sub_x], DatSpecialCase[1][1].lob_densities[sub_x,i], color=2,ls=:dash,lw=2,label="New way analytically reduced to old (bound correction and only keep first order in Dt)")
         plot!(DatNewWayWithNoShift[1][1].slob.x[sub_x], DatNewWayWithNoShift[1][1].lob_densities[sub_x,i], color=3,ls=:dash,lw=2,label="New way with no bound correction (no bound correction and all orders in Dt)")
         plot!(DatNewWayWithShift[1][1].slob.x[sub_x], DatNewWayWithShift[1][1].lob_densities[sub_x,i], color=4,ls=:dash,lw=2,label="New way with bound correction (bound correction and all orders in Dt)")
-        
+
         scatter!(TrulyOldWay[1][1].slob.x[sub_x], TrulyOldWay[1][1].lob_densities[sub_x,i], color=1,label="",markersize=4,markerstrokewidth=0.0);
         scatter!(DatSpecialCase[1][1].slob.x[sub_x], DatSpecialCase[1][1].lob_densities[sub_x,i], color=2,label="",markersize=4,markerstrokewidth=0.0)
         scatter!(DatNewWayWithNoShift[1][1].slob.x[sub_x], DatNewWayWithNoShift[1][1].lob_densities[sub_x,i], color=3,label="",markersize=4,markerstrokewidth=0.0)
         scatter!(DatNewWayWithShift[1][1].slob.x[sub_x], DatNewWayWithShift[1][1].lob_densities[sub_x,i], color=4,label="",markersize=4,markerstrokewidth=0.0)
-        
+
         p_arr1[i-start_pos+1] = plot!()
     end
     plot(p_arr1...,size=(1200,1000))
-    
+
     #png("/home/derickdiana/Desktop/Masters/Reworked/CompareDifferentSchemesWithoutRandomness.png")
     plot!()
 end
@@ -1649,7 +1637,7 @@ l = length(lob_densities¹[1,:,1]) # number of time steps
 
 variances = zeros(Float64,l-1)
 sums = zeros(Float64,l-1)
-for t in 2:l 
+for t in 2:l
     temp = lob_densities¹[:,t,1]/sum(lob_densities¹[:,t,1]) #across all x values, at time "t",  on path 1
     sums[t-1] = sum(temp)
     variances[t-1] = myvar(temp,lob_model¹.x,lob_model¹.Δx)
@@ -1679,7 +1667,7 @@ plot(plt1, plt2, layout=l2, size=(700,700),xlab="Time")
 #StylizedFacts.plot_acf_abs_log_returns(data_stylized_facts, "")
 
 # +
-# save_object("OneRun.jld2",(lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, sample_price_paths¹, P⁺s¹, P⁻s¹, Ps¹, 
+# save_object("OneRun.jld2",(lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, sample_price_paths¹, P⁺s¹, P⁻s¹, Ps¹,
 # lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_price_paths², P⁺s², P⁻s², Ps²))
 # temp = load_object("OneRun.jld2")
 
@@ -1694,14 +1682,14 @@ plot(plt1, plt2, layout=l2, size=(700,700),xlab="Time")
 # function fractional_choose(n,k)
 #     if k==1
 #         temp = 0
-#     else 
+#     else
 #         temp = 0
 #     end
-    
+
 #     if (n==0)
 #         return 0.0 + temp
 #     end
-    
+
 #     return gamma(n+1)/(gamma(n-k+1)*gamma(k+1)) - 1/(n+1)*1/beta(n-k+1,k+1)#*(-1)^k + temp
 # end
 # n = 200
@@ -1714,7 +1702,7 @@ plot(plt1, plt2, layout=l2, size=(700,700),xlab="Time")
 
 # +
 lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, sample_price_paths¹, P⁺s¹, P⁻s¹, Ps¹, V¹,
-lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_price_paths², P⁺s², P⁻s², Ps², V² = 
+lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_price_paths², P⁺s², P⁻s², Ps², V² =
     [nothing for _ in 1:20]
 
 GC.gc()
@@ -1738,23 +1726,23 @@ p_outer = Progress(length(myrange),dt=0.1)
 anim = @animate for s = myrange           #s is the time in simulation time
     r = to_real_time(s, lob_model¹.Δt)  #r is the time in real time
     #s = to_simulation_time(r, lob_model¹.Δt)  #s is the time in real time
-    
+
     #global prev_r, plt1, plt2, plt3, plt4, plt5, plt6, sim_times, real_times
-    
-    
+
+
     plt1 = plot_price_path(s,r,lob_model¹,raw_price_paths¹,sample_price_paths¹)
     plt3 = plot_price_path(s,r,lob_model²,raw_price_paths²,sample_price_paths²)
     plt5 = plot_price_path(s,r,lob_model²,raw_price_paths¹-raw_price_paths²,sample_price_paths¹-sample_price_paths²)
-    
+
     plt2 = plot_density_visual(s, r, lob_model¹, lob_densities¹, couplings¹, sources¹, rl_pushes¹,raw_price_paths¹)
     plt4 = plot_density_visual(s, r, lob_model², lob_densities², couplings², sources², rl_pushes²,raw_price_paths²)
-    plt6 = plot_density_visual(s, r, lob_model², lob_densities¹+lob_densities², 
-                                                 couplings¹+couplings², 
-                                                 sources¹+sources², 
+    plt6 = plot_density_visual(s, r, lob_model², lob_densities¹+lob_densities²,
+                                                 couplings¹+couplings²,
+                                                 sources¹+sources²,
                                                  rl_pushes¹+rl_pushes²,raw_price_paths¹,false)
-    
+
     plot(plt1, plt2, plt3, plt4, plt5, plt6 ,layout=l,size=(1000,1000))
-    
+
     next!(p_outer)
 end
 
@@ -1766,13 +1754,13 @@ gif(anim, "/tmp/LOB.gif", fps=20*length(myrange)/200)
 
 # +
 # Configuration Arguments
-T = 10000 
-num_paths = 1 
+T = 10000
+num_paths = 1
 
 L = 200     # real system width (e.g. 200 meters)
 M = 400     # divided into M pieces , 400
 
-p₀ = 230.0  #this is the mid_price at t=0  238.75 
+p₀ = 230.0  #this is the mid_price at t=0  238.75
 
 # Free-Parameters for gaussian version
 D = 0.5 # real diffusion constant e.g. D=1 (meters^2 / second), 1
@@ -1785,7 +1773,7 @@ r = 0.5 #proportion of time in which it jumps left or right
 
 dist = Normal(0.0,σ) #dist = TDist(1) #dist = Spl(1);
 
-Δx = L / M  # real gap between simulation points 
+Δx = L / M  # real gap between simulation points
 #Δt = (Δx^2) / (2.0 * D) / 10 #* (2.0/3.0) # real time seperation between simulation points
 Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
 print((Δt,to_simulation_time(T,Δt),num_paths*to_simulation_time(T,Δt))) #about 2GB RAM per 100K, i.e. can only do about 1.8 million
@@ -1793,7 +1781,7 @@ lob_model¹.SK_DP
 
 # Source term:
 λ = 1.0
-μ = 0.1 
+μ = 0.1
 
 mySourceTerm = SourceTerm(λ, μ, true);
 
@@ -1808,7 +1796,7 @@ Position = -1
 
 myRLPusher1 = RLPushTerm(SimStartTime,SimEndTime,Position,Volume,false)
 
-lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, σ, ν, α, r, γ, dist, 
+lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, σ, ν, α, r, γ, dist,
     mySourceTerm, myCouplingTerm, myRLPusher1,true);
 
 myRLPusher2 = RLPushTerm(SimStartTime,SimEndTime,Position,Volume,false)
@@ -1818,7 +1806,7 @@ lob_model² = SLOB(num_paths, T, p₀, M, L, D, σ, ν, α, r, γ, dist,
 
 # +
 lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, sample_price_paths¹, P⁺s¹, P⁻s¹, Ps¹, V¹,
-lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_price_paths², P⁺s², P⁻s², Ps², V² = 
+lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_price_paths², P⁺s², P⁻s², Ps², V² =
     [nothing for _ in 1:20]
 
 GC.gc()
@@ -1848,7 +1836,7 @@ num_paths = 1
 L = 200     # real system width (e.g. 200 meters)
 M = 400     # divided into M pieces , 400
 
-p₀ = 230.0  #this is the mid_price at t=0  238.75 
+p₀ = 230.0  #this is the mid_price at t=0  238.75
 
 # Free-Parameters for gaussian version
 D = 0.5 # real diffusion constant e.g. D=1 (meters^2 / second), 1
@@ -1863,7 +1851,7 @@ dist = Normal(0.0,σ) #dist = TDist(1) #dist = Spl(1);
 
 # Source term:
 λ = 1.0
-μ = 0.1 
+μ = 0.1
 
 mySourceTerm = SourceTerm(λ, μ, true);
 
@@ -1880,14 +1868,14 @@ lob_model² = SLOB(num_paths, T, p₀, M, L, D, σ, ν, α, r, γ, dist,
 
 # -
 
-Δx = L / M  # real gap between simulation points 
+Δx = L / M  # real gap between simulation points
 Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
 print((Δt,to_simulation_time(T,Δt),num_paths*to_simulation_time(T,Δt))) #about 2GB RAM per 100K, i.e. can only do about 1.8 million
 lob_model¹.SK_DP
 
 # +
 lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, sample_price_paths¹, P⁺s¹, P⁻s¹, Ps¹, V¹,
-lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_price_paths², P⁺s², P⁻s², Ps², V² = 
+lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_price_paths², P⁺s², P⁻s², Ps², V² =
     [nothing for _ in 1:20]
 
 GC.gc()
@@ -1914,30 +1902,30 @@ p_outer = Progress(length(myrange),dt=0.1)
 anim = @animate for s = myrange           #s is the time in simulation time
     r = to_real_time(s, lob_model¹.Δt)  #r is the time in real time
     #s = to_simulation_time(r, lob_model¹.Δt)  #s is the time in real time
-    
+
     #global prev_r, plt1, plt2, plt3, plt4, plt5, plt6, sim_times, real_times
-    
-    
+
+
     plt1 = plot_price_path(s,r,lob_model¹,raw_price_paths¹,sample_price_paths¹)
     plt3 = plot_price_path(s,r,lob_model²,raw_price_paths²,sample_price_paths²)
     plt5 = plot_price_path(s,r,lob_model²,raw_price_paths¹-raw_price_paths²,sample_price_paths¹-sample_price_paths²)
-    
+
     plt2 = plot_density_visual(s, r, lob_model¹, lob_densities¹, couplings¹, sources¹, rl_pushes¹,raw_price_paths¹)
     plt4 = plot_density_visual(s, r, lob_model², lob_densities², couplings², sources², rl_pushes²,raw_price_paths²)
-    plt6 = plot_density_visual(s, r, lob_model², lob_densities¹+lob_densities², 
-                                                 couplings¹+couplings², 
-                                                 sources¹+sources², 
+    plt6 = plot_density_visual(s, r, lob_model², lob_densities¹+lob_densities²,
+                                                 couplings¹+couplings²,
+                                                 sources¹+sources²,
                                                  rl_pushes¹+rl_pushes²,raw_price_paths¹,false)
-    
+
     plot(plt1, plt2, plt3, plt4, plt5, plt6 ,layout=l,size=(1000,1000))
-    
+
     next!(p_outer)
 end
 
 gif(anim, "/tmp/LOB.gif", fps=20*length(myrange)/200)
 
 # +
-volume_indices = [1:50;] 
+volume_indices = [1:50;]
 volume_indices = volume_indices./2
 gamma_indices = [1.0,0.9,0.8,0.7,0.6]
 
@@ -1952,21 +1940,21 @@ var_price_impacts_frac = ones(Float64,gi_len,vi_len)
 
 Δt_largest = (r * (Δx^2) / (2.0 * D))^(1/1)
 
-for Gamma in 1:gi_len 
+for Gamma in 1:gi_len
     p_outer = Progress(vi_len,dt=0.1)
-    
+
     γ = gamma_indices[Gamma]
     Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
 
     T = 10
     RealStartTime = 8 # when, in real time, to kick the system. Starts late to give system time to relax. Must be latest of all the gammas to try
     SimStartTime = to_simulation_time(RealStartTime,Δt)-2 # convert to simulation time
-    
+
     print(2)
-    
+
     for Volume in 1:vi_len
         volume = volume_indices[Volume]
-        
+
         myRLPusher¹ = RLPushTerm(SimStartTime,SimStartTime+2,Position,volume,true)
         lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, σ, ν, α, r, γ, dist,
             mySourceTerm, myCouplingTerm, myRLPusher¹,true);
@@ -1974,10 +1962,10 @@ for Gamma in 1:gi_len
         myRLPusher² = RLPushTerm(SimStartTime,SimStartTime+2,Position,volume,true)
         lob_model² = SLOB(num_paths, T, p₀, M, L, D, σ, ν, α, r, γ, dist,
             mySourceTerm, myCouplingTerm, myRLPusher²,true);
-        
+
 
         lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, sample_price_paths¹, P⁺s¹, P⁻s¹, Ps¹, V¹,
-        lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_price_paths², P⁺s², P⁻s², Ps², V² = 
+        lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_price_paths², P⁺s², P⁻s², Ps², V² =
             [nothing for _ in 1:20]
 
         GC.gc()
@@ -2035,7 +2023,7 @@ plot!(size=(1000,1000))
 # ## Price impact adaptive delay and duration
 
 # +
-volume_indices = [1:50;] 
+volume_indices = [1:50;]
 volume_indices = volume_indices./2
 gamma_indices = [1.0,0.9,0.8,0.7,0.6]
 
@@ -2050,22 +2038,22 @@ var_price_impacts_frac = ones(Float64,gi_len,vi_len)
 
 Δt_largest = (r * (Δx^2) / (2.0 * D))^(1/1)
 
-for Gamma in 1:gi_len 
+for Gamma in 1:gi_len
     p_outer = Progress(vi_len,dt=0.1)
-    
+
     γ = gamma_indices[Gamma]
     Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
 
     T = 10
     RealStartTime = 8 # when, in real time, to kick the system. Starts late to give system time to relax. Must be latest of all the gammas to try
     SimStartTime = to_simulation_time(RealStartTime,Δt)-2 # convert to simulation time
-    
+
     l = to_simulation_time(Δt_largest,Δt)
     print(l)
-    
+
     for Volume in 1:vi_len
         volume = volume_indices[Volume]
-        
+
         myRLPusher¹ = RLPushTerm(SimStartTime,SimStartTime+l,Position,volume,true)
         lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, σ, ν, α, r, γ, dist,
             mySourceTerm, myCouplingTerm, myRLPusher¹,true);
@@ -2073,10 +2061,10 @@ for Gamma in 1:gi_len
         myRLPusher² = RLPushTerm(SimStartTime,SimStartTime+l,Position,volume,true)
         lob_model² = SLOB(num_paths, T, p₀, M, L, D, σ, ν, α, r, γ, dist,
             mySourceTerm, myCouplingTerm, myRLPusher²,true);
-        
+
 
         lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, sample_price_paths¹, P⁺s¹, P⁻s¹, Ps¹, V¹,
-        lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_price_paths², P⁺s², P⁻s², Ps², V² = 
+        lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_price_paths², P⁺s², P⁻s², Ps², V² =
             [nothing for _ in 1:20]
 
         GC.gc()
@@ -2138,7 +2126,7 @@ num_paths = 50#30
 L = 200     # real system width (e.g. 200 meters)
 M = 400     # divided into M pieces , 400
 
-p₀ = 230.0  #this is the mid_price at t=0  238.75 
+p₀ = 230.0  #this is the mid_price at t=0  238.75
 
 # Free-Parameters for gaussian version
 D = 0.5#0.5/8 # real diffusion constant e.g. D=1 (meters^2 / second), 1
@@ -2167,7 +2155,7 @@ lag = 10 #lag
 do_random_walk = false #behave like a random walk
 myRandomnessTerm = RandomnessTerm(σ,r,β,lag,do_random_walk,false)
 
-Δx = L / M  # real gap between simulation points 
+Δx = L / M  # real gap between simulation points
 Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
 
 # RL Stuff:
@@ -2196,18 +2184,18 @@ fieldnames(SLOB)
 # check something actually happens for one example
 if true
     myCouplingTerm = CouplingTerm(μ, a, b, c, false);
-    
+
     Volume = 10
 
     myRLPusherPush = RLPushTerm(SimKickStartTime,SimKickStartTime+1,Position,Volume,true)
     myRLPusherNoPush = RLPushTerm(SimKickStartTime,SimKickStartTime+1,Position,Volume,false)
-    
+
     lob_model_push = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
         mySourceTerm, myCouplingTerm, myRLPusherPush,myRandomnessTerm,shift=0,old_way=false);
-    
+
     lob_model_no_push = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
         mySourceTerm, myCouplingTerm, myRLPusherNoPush,myRandomnessTerm,shift=0,old_way=false);
-    
+
     try clear_double_dict(Dat) catch e print("Not initialized") end
     GC.gc()
 
@@ -2219,7 +2207,7 @@ if true
         p_arr1[i] = plot_density_visual(SimKickStartTime-2+i, to_real_time(SimKickStartTime-2+i,Δt), 1, Dat,false, true, 10, Dat[1][1].raw_price_paths[SimKickStartTime])
     end
     plot(p_arr1...,size=(1200,1000))
-    
+
     #png("/home/derickdiana/Desktop/Masters/OfficialOne/DraftOnePics/SinglePointDiffusionStepByStep.png")
     plot!()
 end
@@ -2233,7 +2221,7 @@ vline!([SimKickStartTime],label="Kick time")
 hline!([-Δt*Volume],label="Theoretical kick volume")
 
 # +
-volumes = [1:70;] 
+volumes = [1:70;]
 volumes = volumes.*0.03
 
 vi_len = length(volumes)
@@ -2248,13 +2236,13 @@ price_impact = zeros(Float64,num_paths)
 
 for Volume in 1:vi_len
     myCouplingTerm = CouplingTerm(μ, a, b, c, false);
-    
+
     myRLPusherPush = RLPushTerm(SimKickStartTime,SimKickStartTime+l,Position,volumes[Volume],true)
     myRLPusherNoPush = RLPushTerm(SimKickStartTime,SimKickStartTime+l,Position,volumes[Volume],false)
-    
+
     lob_model_push = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
         mySourceTerm, myCouplingTerm, myRLPusherPush,myRandomnessTerm);
-    
+
     lob_model_no_push = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
         mySourceTerm, myCouplingTerm, myRLPusherNoPush,myRandomnessTerm);
 
@@ -2262,15 +2250,15 @@ for Volume in 1:vi_len
     GC.gc()
 
     Dat = InteractOrderBooks([lob_model_push,lob_model_no_push], -1, false) ;
-    
+
     price_impact = zeros(Float64,num_paths)
     for path_num in 1:num_paths
         price_impact[path_num] = Dat[path_num][1].raw_price_paths[SimKickStartTime+l] - Dat[path_num][1].raw_price_paths[SimKickStartTime]
     end
-    
+
     mean_price_impacts[Volume] = mean(price_impact)
     var_price_impacts[Volume] = var(price_impact)
-    
+
     next!(p_outer)
 end
 

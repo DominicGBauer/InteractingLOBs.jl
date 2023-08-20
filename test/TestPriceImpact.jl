@@ -2,13 +2,13 @@
 using Revise
 using Plots
 using RelevanceStacktrace
-using StatsBase 
+using StatsBase
 using Distributions
 using ProgressMeter
 using Statistics
 using Random
 import Random:rand
-using CurveFit      
+using CurveFit
 
 using InteractingLOBs
 
@@ -18,12 +18,12 @@ using InteractingLOBs
 # num_paths = ... set below
 
 L = 200     # real system width (e.g. 200 meters)
-M = 400     # divided into M pieces  
-p₀ = 230.0 #this is the mid_price at t=0 
+M = 400     # divided into M pieces
+p₀ = 230.0 #this is the mid_price at t=0
 
 # Free-Parameters for gaussian version
 D = 0.5 # real diffusion constant e.g. D=1 (meters^2 / second)
-σ = 1.0 
+σ = 1.0
 
 ν = 0.5
 α = 0.0
@@ -34,12 +34,12 @@ dist = Normal(0.0,σ);
 #dist = TDist(1)
 # -
 
-Δx = L / M  # real gap between simulation points 
+Δx = L / M  # real gap between simulation points
 Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
 
 # +
 λ = 1.0
-μ = 0.1 
+μ = 0.1
 
 mySourceTerm = SourceTerm(λ, μ, true);
 # -
@@ -70,7 +70,7 @@ mean_log_price_impacts = [0.0 for x in volume_indices]
 var_log_price_impacts = [0.0 for x in volume_indices]
 
 p_outer = Progress(volume_indices[end],dt=0.1)
-scale_volume = 1.5  #volume_indices must be counting numbers i.e. 1,2,3..., 
+scale_volume = 1.5  #volume_indices must be counting numbers i.e. 1,2,3...,
                     #so stretch it out with this if you need to count in, say, 10s by settings scale_volume=10
 
 l = 1
@@ -79,21 +79,21 @@ for Volume in volume_indices
     myRLPusher¹ = RLPushTerm(SimStartTime,SimStartTime+1,Position,scale_volume*Volume,true)
     lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, σ, ν, α, r, γ, dist,
         mySourceTerm, myCouplingTerm, myRLPusher¹,false);
-    
+
     myRLPusher² = RLPushTerm(SimStartTime,SimStartTime+1,Position,scale_volume*Volume,true)
     lob_model² = SLOB(num_paths, T, p₀, M, L, D, σ, ν, α, r, γ, dist,
         mySourceTerm, myCouplingTerm, myRLPusher²,false);
-    
+
     lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, sample_price_paths¹, P⁺s¹, P⁻s¹, Ps¹, V¹,
-    lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_price_paths², P⁺s², P⁻s², Ps², V² = 
+    lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_price_paths², P⁺s², P⁻s², Ps², V² =
         [nothing for _ in 1:20]
 
     GC.gc()
-    
+
     lob_densities¹, sources¹, couplings¹, rl_pushes¹, raw_price_paths¹, sample_price_paths¹, P⁺s¹, P⁻s¹, Ps¹, V¹,
     lob_densities², sources², couplings², rl_pushes², raw_price_paths², sample_price_paths², P⁺s², P⁻s², Ps², V² =
     InteractOrderBooks(lob_model¹,lob_model², -1, false) ;
-    
+
     #price_impact¹ = sample_price_paths¹[RealStartTime+1,:] - sample_price_paths¹[RealStartTime,:]
     #price_impact² = sample_price_paths²[RealStartTime+1,:] - sample_price_paths²[RealStartTime,:]
     #price_impact = cat(price_impact¹,price_impact²,dims=1)
@@ -102,15 +102,15 @@ for Volume in volume_indices
     price_impact = cat(price_impact¹,price_impact²,dims=1)
     mean_price_impacts[Volume-volume_indices[1]+1] = mean(price_impact)
     var_price_impacts[Volume-volume_indices[1]+1] = var(price_impact)
-    
-    
+
+
     #log_price_impact¹ = log.(sample_price_paths¹[RealStartTime,:]) - log.(sample_price_paths¹[RealStartTime-1,:])
     #log_price_impact² = log.(sample_price_paths²[RealStartTime,:]) - log.(sample_price_paths²[RealStartTime-1,:])
     #log_price_impact  = cat(log_price_impact¹,log_price_impact²,dims=1)
-    
+
     #mean_log_price_impacts[Volume] = mean(log_price_impact)
     #var_log_price_impacts[Volume] = var(log_price_impact)
-    
+
     next!(p_outer)
 end
 # -
@@ -128,7 +128,7 @@ plot!(x,a.+b.*log.(x),label="Log fit",w=2)
 plot!(xlabel="Volume",ylabel="Price impact i.e. p(t+1)-p(t)")
 #png("/home/derickdiana/Desktop/Masters/StillWorking/Price_Impact_For_Alpha_Is_0.7_No_Random_Component.png")
 # -
-png("/home/derickdiana/Desktop/Masters/StillWorking/Price_Impact_For_Alpha_Is_0.5_No_Random_Component.png")
+png("/Users/dominic/Desktop/personal-projects/InteractingLOBs.jl/StillWorking/Price_Impact_For_Alpha_Is_0.5_No_Random_Component.png")
 
 
 Revise.revise()
