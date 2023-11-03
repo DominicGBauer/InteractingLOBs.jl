@@ -1,4 +1,4 @@
-using InteractingLOBs
+using InteractingLOBs, LaTeXStrings
 
 include("./epps.jl")
 
@@ -59,8 +59,6 @@ lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
 lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
     mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);
 
-lob_model¹.SK_DP
-
 # total_steps = 10
 # total_length = to_simulation_time(T,Δt)
 # step = floor(Int,total_length/total_steps)
@@ -71,107 +69,103 @@ r = to_real_time(14401, lob_model¹.Δt)  #r is the time in real time
 s = to_simulation_time(r, lob_model¹.Δt)  #s is the time in real time
 
 Data = InteractOrderBooks([lob_model¹,lob_model²], -1, true);
-path1 = Data[1][1].raw_price_paths[1:s]
-path2 = Data[1][2].raw_price_paths[1:s]
-index_vector = 0:1.0:(size(path2)[1]-1)
-epps_data = hcat(index_vector, path1, path2)
+index_vector = 0:1.0:(size(Data[1][1].raw_price_paths[1:s])[1]-1)
 
-# print(epps_data[1:3,:])
+
+function generate_epps_plots_values(simulation_data)
+    epps_value = [zeros(M, 1) for i = 1:num_paths]
+    epps_mean = [zeros(M, 1) for i = 1:num_paths]
+    total_epps_mean = zeros(size(epps_mean[1])[1])
+    total_epps_value = zeros(size(epps_value[1])[1])
+    m = 0
+
+    for i in 1:num_paths
+        path1 = simulation_data[i][1].raw_price_paths[1:s]
+        path2 = simulation_data[i][2].raw_price_paths[1:s]
+        index_vector = 0:1.0:(size(simulation_data[i][2].raw_price_paths[1:s])[1]-1)
+        epps_data = hcat(index_vector, path1, path2)
+        epps = Empirical(epps_data)
+        m = size(epps_data)[1]
+        # Save and Load
+        # save("Computed Data/EppsCorrection/Empirical$i.jld", "epps$i", epps[i])
+        # ComputedResults = load("Computed Data/EppsCorrection/Empirical$i.jld")
+        # epps_result = ComputedResults["epps$i"]
+        epps_value[i] = epps[1]
+        epps_mean[i] = mean(epps[1], dims=2)
+        total_epps_mean = total_epps_mean .+ epps_mean[i]
+        total_epps_value = total_epps_value .+ epps_value[i]
+    end
+
+    average_epps_mean = total_epps_mean ./ num_paths
+    average_epps_value = total_epps_value ./ num_paths
+
+    return (average_epps_mean, average_epps_value, m)
+end
+
+# (average_epps_mean, average_epps_value, m) = generate_epps_plots_values(Data)
+
+# # Plots
+# dt = collect(1:1:400)
+# q = quantile.(TDist(m-1), [0.975])
+
+# p1 = plot(dt, average_epps_mean, legend = false,dpi=300, ribbon=(q .* std(average_epps_value, dims = 2) * 0.001), fillalpha=.15)
+# xlabel!(p1, L"\Delta t\textrm{[sec]}")
+# ylabel!(p1, L"\rho_{\Delta t}^{ij}")
+
+# savefig(p1, "Plots/Epps/Epps.png")
+
+# p1 = plot(dt, epps_mean[1], legend = false,dpi=300, fillalpha=.15)
+# plot!(dt, epps_mean[2], legend = false,dpi=300, fillalpha=.15)
+# plot!(dt, epps_mean[3], legend = false,dpi=300, fillalpha=.15)
+# plot!(dt, epps_mean[4], legend = false,dpi=300, fillalpha=.15)
+# plot!(dt, epps_mean[5], legend = false,dpi=300, fillalpha=.15)
+
+# p1 = plot(dt, epps_mean[1], legend = false,dpi=300, fillalpha=.15)
+# plot!(dt, epps_mean[2], legend = false,dpi=300, fillalpha=.15)
+# plot!(dt, epps_mean[3], legend = false,dpi=300, fillalpha=.15)
+# plot!(dt, epps_mean[4], legend = false,dpi=300, fillalpha=.15)
+# plot!(dt, epps_mean[5], legend = false,dpi=300, fillalpha=.15)
+# plot(dt, total_epps_mean, legend = false,dpi=300, ribbon=(q .* std(total_epps_value, dims = 2) .* 0.001), line=(2, [:solid]), fillalpha=.15, color=:red)
+
+# function get_indicative_path(data)
+#     total_prices_path_1 = zeros(size(data[1][1].raw_price_paths[1:s]))
+#     total_prices_path_2 = zeros(size(data[1][1].raw_price_paths[1:s]))
+#     for i in 1:num_paths
+#         total_prices_path_1 = total_prices_path_1 + Data[i][1].raw_price_paths[1:s]
+#         total_prices_path_2 = total_prices_path_1 + Data[i][2].raw_price_paths[1:s]
+#     end
+#     average_prices_path_1 = total_prices_path_1 ./ num_paths
+#     average_prices_path_2 = total_prices_path_2 ./ num_paths
+
+#     return (average_prices_path_1, average_prices_path_2)
+# end
+# (path1, path2) = get_indicative_path(Data)
+# epps_data = hcat(index_vector, path1, path2)
+
 # epps = Empirical(epps_data)
 
 # Save and Load
 # save("Computed Data/EppsCorrection/Empirical.jld", "epps", epps)
 
-ComputedResults = load("Computed Data/EppsCorrection/Empirical.jld")
-epps = ComputedResults["epps"]
+# ComputedResults = load("Computed Data/EppsCorrection/Empirical.jld")
+# epps = ComputedResults["epps"]
 
 # Plots
-dt = collect(1:1:400)
-m = size(epps_data)[1]
-q = quantile.(TDist(m-1), [0.975])
+# dt = collect(1:1:400)
+# m = size(epps_data)[1]
+# q = quantile.(TDist(m-1), [0.975])
 
-p1 = plot(dt, mean(epps[1], dims=2), dpi=300)
+# epps_mean = mean(epps[1], dims=2)
+# p1 = plot(dt, epps_mean, legend = false,dpi=300, ribbon=(q .* std(epps[1], dims = 2) * 0.00001), fillalpha=.15)
+
+# p1 = plot(dt, epps_mean, legend = :bottomright,dpi=300, label = L"\textrm{Measured}", ribbon=(movingaverage * 0.05))
+# plot!(movingaverage_upper, color=:red, label = L"\textrm{LOL}")
+# plot!(movingaverage_lower, color=:red, label = L"\textrm{SMA -2% lower bound}")
+# p1 = plot(dt, mean(SBKFSR[1], dims=2), ribbon=(q .* std(SBKFSR[1], dims = 2)), fillalpha=.15, legend = :topright, color = :red, line=(1, [:solid]), label = L"\textrm{Measured}", marker=([:+ :d],1,0,stroke(2,:red)), dpi = 300, ylims = (-0.1, 1.55))
 # plot!(p1, dt, mean(epps[2], dims=2), ribbon=(q .* std(epps[2], dims = 2)), fillalpha=.15, color = :blue, line=(1, [:solid]), label = L"\textrm{Flat trade correction}", marker=([:x :d],1,0,stroke(2,:blue)))
 # plot!(p1, dt, mean(epps[3], dims=2), ribbon=(q .* std(epps[3], dims = 2)), fillalpha=.15, color = :green, line=(1, [:solid]), label = L"\textrm{Overlap correction}", marker=([:circle :d],1,0,stroke(2,:green)))
 # hline!(p1, [mean(epps[4])], ribbon=(q .* std(epps[4], dims = 1)), fillalpha=.15, color = :brown, line=(1, [:dash]), label = L"\textrm{HY}")
-xlabel!(p1, L"\Delta t\textrm{[sec]}")
-ylabel!(p1, L"\rho_{\Delta t}^{ij}")
+# xlabel!(p1, L"\Delta t\textrm{[sec]}")
+# ylabel!(p1, L"\rho_{\Delta t}^{ij}")
 
-savefig(p1, "Plots/Epps/Epps.png")
-
-# path_to_plot = 1
-# function plot_price_path(s, r, lob_num, Dat, diff=false)
-#     lob_model = Dat[1][lob_num].slob
-
-#     plt = plot()
-#     for path in 1:lob_model.num_paths
-#         raw_price_paths = Dat[path][lob_num].raw_price_paths[1:s]
-#         if diff
-#             raw_price_paths .-=  Dat[path][3-lob_num].raw_price_paths[1:s]
-#         end
-#         plot!((0:s-1).*lob_model.Δt,raw_price_paths ,color=5,w=0.6) ;
-
-#     end
-
-#     obs_price_paths = Dat[path_to_plot][lob_num].obs_price_paths[1:r]
-#     if diff
-#         obs_price_paths .-=  Dat[path_to_plot][3-lob_num].obs_price_paths[1:r]
-#     end
-#     plot!(0:r-1, obs_price_paths,color=1,w=2.7) ;
-
-#     plot!(legend=false, ylab="Price", xlab="Time") ;
-#     return plt
-# end
-
-# plot_price_path(s,r,1,Data)
-
-
-
-# # +
-# # clear everything pointed to by the dictionary then garbage collect. If it wasn't assigned yet it will left you know
-# try clear_double_dict(Dat) catch e print("Not initialized") end
-# GC.gc()
-
-# Dat = InteractOrderBooks([lob_model¹,lob_model²], -1, true) ;
-# #Dat = InteractOrderBooks([lob_model¹], -1, true) ;
-
-# # +
-# #total_steps = min(to_simulation_time(T,Δt),100)
-# total_steps = 10
-# total_length = to_simulation_time(T,Δt)
-# step = floor(Int,total_length/total_steps)
-
-# range = 1:step:(total_length-step)
-# #range = [SimStartTime:SimStartTime+to_sim(1)*2;]
-# #range = [SimStartTime]
-
-# p_outer = Progress(length(range),dt=0.1)
-
-# l = @layout [a d; b e; c f];
-
-# anim = @animate for s = range           #s is the time in simulation time
-#     r = to_real_time(s, lob_model¹.Δt)  #r is the time in real time
-#     #s = to_simulation_time(r, lob_model¹.Δt)  #s is the time in real time
-
-#     plt1 = plot_price_path(s,r,1,Dat)
-#     if length(Dat[1])>1
-#         plt3 = plot_price_path(s,r,2,Dat)
-#         plt5 = plot_price_path(s,r,1,Dat,true)
-#     end
-
-#     plt2 = plot_density_visual(s, r, 1, Dat)
-#     if length(Dat[1])>1
-#         plt4 = plot_density_visual(s, r, 2, Dat)
-#         plt6 = plot_density_visual(s, r, 1, Dat; dosum=true, plot_raw_price=false)
-#     end
-
-#     if length(Dat[1])>1
-#         plot(plt1, plt2, plt3, plt4, plt5, plt6 ,layout=l,size=(1000,1000))
-#     else
-#         plot(plt1,plt2,size=(1000,1000))
-#     end
-
-#     next!(p_outer)
-# end
-
-# gif(anim, "/tmp/LOB.gif", fps=20*length(range)/200)
+# savefig(p1, "Plots/Epps/Epps.png")

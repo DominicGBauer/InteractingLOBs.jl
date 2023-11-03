@@ -3,7 +3,7 @@ include("../setup.jl")
 volumes = 1:100
 
 function get_set_inner(volume,γ,ν)
-    myRandomnessTerm = RandomnessTerm(σ,r,β,lag,do_random_walk,false)
+    myRandomnessTerm = RandomnessTerm(σ,r,β,lag,do_random_walk,true)
     myCouplingTerm = CouplingTerm(μ, a, b, c, true);
 
     Δt = (r * (Δx^2) / (2.0 * D * myscale))^(1/γ)

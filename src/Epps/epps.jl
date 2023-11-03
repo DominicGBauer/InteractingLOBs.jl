@@ -2,7 +2,7 @@
 # Script file to investigate the correction of the Epps effect arising
 # from asynchronous sampling on 40 days of JSE data
 
-using LinearAlgebra, Plots, LaTeXStrings, StatsBase, Intervals, JLD, ProgressMeter, Distributions, Optim, ArgCheck, FINUFFT, FFTW
+using LinearAlgebra, Plots, LaTeXStrings, StatsBase, Intervals, JLD2, ProgressMeter, Distributions, Optim, ArgCheck, FINUFFT, FFTW
 #---------------------------------------------------------------------------
 
 include("../Functions/Correlation Estimators/Dirichlet/NUFFTcorrDK-FGG.jl")
@@ -91,4 +91,34 @@ end
 function Empirical(Fulldata)
     res = computecorrs(Fulldata)
     return res
+end
+
+function generate_epps_plots_values(simulation_data)
+    epps_value = [zeros(M, 1) for i = 1:num_paths]
+    epps_mean = [zeros(M, 1) for i = 1:num_paths]
+    total_epps_mean = zeros(size(epps_mean[1])[1])
+    total_epps_value = zeros(size(epps_value[1])[1])
+    m = 0
+
+    for i in 1:num_paths
+        path1 = simulation_data[i][1].raw_price_paths[1:s]
+        path2 = simulation_data[i][2].raw_price_paths[1:s]
+        index_vector = 0:1.0:(size(simulation_data[i][2].raw_price_paths[1:s])[1]-1)
+        epps_data = hcat(index_vector, path1, path2)
+        epps = Empirical(epps_data)
+        m = size(epps_data)[1]
+        # Save and Load
+        # save("Computed Data/EppsCorrection/Empirical$i.jld", "epps$i", epps[i])
+        # ComputedResults = load("Computed Data/EppsCorrection/Empirical$i.jld")
+        # epps_result = ComputedResults["epps$i"]
+        epps_value[i] = epps[1]
+        epps_mean[i] = mean(epps[1], dims=2)
+        total_epps_mean = total_epps_mean .+ epps_mean[i]
+        total_epps_value = total_epps_value .+ epps_value[i]
+    end
+
+    average_epps_mean = total_epps_mean ./ num_paths
+    average_epps_value = total_epps_value ./ num_paths
+
+    return (average_epps_mean, average_epps_value, m)
 end

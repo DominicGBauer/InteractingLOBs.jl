@@ -283,7 +283,6 @@ function dtrw_solver_fractional(D) #handles change over time logic
 
     #check if broken
     if !(not_broke)
-        print("BE")
         broke_point = t-1
     end
 

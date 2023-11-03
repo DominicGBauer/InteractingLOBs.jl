@@ -17,8 +17,8 @@ function StylizedFactsPlot(price_path)
     log_price_path = log.(price_path) #Apply log onto price path
     log_returns = diff(log_price_path) # returns log_returns[i+1] - log_returns[i] for all i in 1 to end-1
 
-    return StylizedFactsPlot(price_path,log_price_path, log_returns) 
-    
+    return StylizedFactsPlot(price_path,log_price_path, log_returns)
+
 end
 # -
 
@@ -36,7 +36,7 @@ function StylizedFactsPlot(price_path,log_price_path,log_returns)
 
     return StylizedFactsPlot(price_path, log_price_path, log_returns,
         order_signs, order_flow_acf, log_returns_acf, abs_log_returns_acf,
-        N, L, l_conf, u_conf) 
+        N, L, l_conf, u_conf)
 end
 
 function hist_log_returns(sf::StylizedFactsPlot, title="Log Returns Histogram")
@@ -111,7 +111,7 @@ function plot_all_stylized_facts(sf::StylizedFactsPlot, plot_size=(1000, 800), t
         p6 = plot_acf_abs_log_returns(sf, title="")
         p7 = hist_log_returns(sf, title="")
         p8 = plot(p1, p7, p2, p3, p4, p5, p6, layout=l, tickfontsize=6, guidefontsize=8,
-            titlefontsize=10, right_margin=5mm, size=plot_size);
+            titlefontsize=10, right_margin=5mm, size=plot_size, dpi=300);
         return p8
     else
         p1 = plot(1:size(sf.price_path, 1), sf.price_path, legend=false,
@@ -123,8 +123,7 @@ function plot_all_stylized_facts(sf::StylizedFactsPlot, plot_size=(1000, 800), t
         p6 = plot_acf_abs_log_returns(sf)
         p7 = hist_log_returns(sf)
         p8 = plot(p1, p7, p2, p3, p4, p5, p6, layout=l, tickfontsize=6, guidefontsize=8,
-            titlefontsize=10, right_margin=5mm, size=plot_size);
+            titlefontsize=10, right_margin=5mm, size=plot_size, dpi=300);
         return p8
     end
 end
-

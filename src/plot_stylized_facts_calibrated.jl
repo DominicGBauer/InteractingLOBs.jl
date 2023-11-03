@@ -1,6 +1,6 @@
-using InteractingLOBs, Plots
+using InteractingLOBs, LaTeXStrings
 
-num_paths = 5#30
+num_paths = 2#30
 
 L = 200     # real system width (e.g. 200 meters)
 M = 400     # divided into M pieces , 400
@@ -9,11 +9,11 @@ T = 2000  # simulation runs until real time T (e.g. 80 seconds)
 p₀ = 230.0  #this is the mid_price at t=0  238.75
 
 # Free-Parameters for gaussian version
-D = 0.5 # real diffusion constant e.g. D=1 (meters^2 / second), 1
+D = 0.27 # real diffusion constant e.g. D=1 (meters^2 / second), 1
 α = 0.0 # legacy, no longer used
 
-ν = 14.0 #removal rate
-γ = 1.0 #fraction of derivative (1 is normal diffusion, less than 1 is D^{1-γ} derivative on the RHS)
+ν = 10.55 #removal rate
+γ = 0.57 #fraction of derivative (1 is normal diffusion, less than 1 is D^{1-γ} derivative on the RHS)
 
 # Source term:
 λ = 1.0 #
@@ -48,7 +48,27 @@ Position = 200
 Volume = -8; # If position == -x where x>=0, then put it x above the mid price each time
 
 myRLPusher1 = RLPushTerm(SimStartTime,SimEndTime,Position,Volume,true)
+
 myRLPusher2 = RLPushTerm(SimStartTime,SimEndTime,Position,Volume,false)
 
-lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ, mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
-lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ, mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);
+lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
+    mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
+
+lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
+    mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);
+
+# total_steps = 10
+# total_length = to_simulation_time(T,Δt)
+# step = floor(Int,total_length/total_steps)
+
+# range = 1:step:(total_length-step)
+
+r = to_real_time(14401, lob_model¹.Δt)  #r is the time in real time
+s = to_simulation_time(r, lob_model¹.Δt)  #s is the time in real time
+
+Data = InteractOrderBooks([lob_model¹,lob_model²], -1, true);
+
+data_stylized_facts = StylizedFactsPlot(Data[1][1].raw_price_paths[1:s]);
+
+p1 = plot_all_stylized_facts(data_stylized_facts,(1000,1200))
+# savefig(p1, "Plots/StylizedFacts/Calibrated")

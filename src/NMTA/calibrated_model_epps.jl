@@ -1,19 +1,28 @@
-using InteractingLOBs, Plots
+using InteractingLOBs
 
-num_paths = 5#30
+# 400.0
+# 200.0
+#   0.26547709986222817
+#   3.553959522515485
+#   0.5708687099296322
+
+include("../Epps/epps.jl")
+
+
+num_paths = 10#30
 
 L = 200     # real system width (e.g. 200 meters)
-M = 400     # divided into M pieces , 400
+M = 400    # divided into M pieces , 400
 
 T = 2000  # simulation runs until real time T (e.g. 80 seconds)
 p₀ = 230.0  #this is the mid_price at t=0  238.75
 
 # Free-Parameters for gaussian version
-D = 0.5 # real diffusion constant e.g. D=1 (meters^2 / second), 1
+D = 0.27 # real diffusion constant e.g. D=1 (meters^2 / second), 1
 α = 0.0 # legacy, no longer used
 
-ν = 14.0 #removal rate
-γ = 1.0 #fraction of derivative (1 is normal diffusion, less than 1 is D^{1-γ} derivative on the RHS)
+ν = 3.55 #removal rate
+γ = 0.57 #fraction of derivative (1 is normal diffusion, less than 1 is D^{1-γ} derivative on the RHS)
 
 # Source term:
 λ = 1.0 #
@@ -48,7 +57,37 @@ Position = 200
 Volume = -8; # If position == -x where x>=0, then put it x above the mid price each time
 
 myRLPusher1 = RLPushTerm(SimStartTime,SimEndTime,Position,Volume,true)
+
 myRLPusher2 = RLPushTerm(SimStartTime,SimEndTime,Position,Volume,false)
 
-lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ, mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
-lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ, mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);
+lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
+    mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
+
+lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
+    mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);
+
+lob_model¹.SK_DP
+
+# total_steps = 10
+# total_length = to_simulation_time(T,Δt)
+# step = floor(Int,total_length/total_steps)
+
+# range = 1:step:(total_length-step)
+
+r = to_real_time(14401, lob_model¹.Δt)  #r is the time in real time
+s = to_simulation_time(r, lob_model¹.Δt)  #s is the time in real time
+
+Data = InteractOrderBooks([lob_model¹,lob_model²], -1, true);
+
+(average_epps_mean, average_epps_value, m) = generate_epps_plots_values(Data)
+
+# Plots
+dt = collect(1:1:400)
+q = quantile.(TDist(m-1), [0.975])
+
+p1 = plot(dt, average_epps_mean, legend = false,dpi=300, ribbon=(q .* std(average_epps_value, dims = 2) * 0.001), fillalpha=.15)
+xlabel!(p1, L"\Delta t\textrm{[sec]}")
+ylabel!(p1, L"\rho_{\Delta t}^{ij}")
+
+
+savefig(p1, "Plots/Epps/Epps_Calibrated.png")

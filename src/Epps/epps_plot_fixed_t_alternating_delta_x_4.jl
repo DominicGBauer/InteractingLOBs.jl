@@ -1,6 +1,13 @@
-using InteractingLOBs, Plots
+# L = 200
+# M = 400
+# Δx = 0.5
 
-num_paths = 5#30
+using InteractingLOBs
+
+include("../setup.jl")
+include("./epps.jl")
+
+num_paths = 30#30
 
 L = 200     # real system width (e.g. 200 meters)
 M = 400     # divided into M pieces , 400
@@ -38,7 +45,7 @@ myRandomnessTerm = RandomnessTerm(σ,r,β,lag,do_random_walk,true)
 
 
 Δx = L / M  # real gap between simulation points
-Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
+Δt = 0.03
 
 # RL Stuff:
 RealStartTime = 50 # when, in real time, to kick the system
@@ -48,7 +55,46 @@ Position = 200
 Volume = -8; # If position == -x where x>=0, then put it x above the mid price each time
 
 myRLPusher1 = RLPushTerm(SimStartTime,SimEndTime,Position,Volume,true)
+
 myRLPusher2 = RLPushTerm(SimStartTime,SimEndTime,Position,Volume,false)
 
-lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ, mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
-lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ, mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);
+lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
+    mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
+
+lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
+    mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);
+
+# total_steps = 10
+# total_length = to_simulation_time(T,Δt)
+# step = floor(Int,total_length/total_steps)
+
+# range = 1:step:(total_length-step)
+
+r = to_real_time(7113, lob_model¹.Δt)  #r is the time in real time
+s = to_simulation_time(r, lob_model¹.Δt)  #s is the time in real time
+
+Data = InteractOrderBooks([lob_model¹,lob_model²], -1, true);
+# path1 = Data[1][1].raw_price_paths[1:s]
+# path2 = Data[1][2].raw_price_paths[1:s]
+# index_vector = 0:1.0:(size(path2)[1]-1)
+# epps_data = hcat(index_vector, path1, path2)
+
+# # uncomment to rerun
+# epps_4 = Empirical(epps_data)
+# save("Computed Data/EppsCorrection/Empirical_delta_x_1_over_2.png.jld", "epps", epps_4)
+
+# ComputedResults = load("Computed Data/EppsCorrection/Empirical_delta_x_1_over_2.png.jld")
+# epps_4 = ComputedResults["epps"]
+
+# Plots
+dt = collect(1:1:400)
+q = quantile.(TDist(m-1), [0.975])
+
+(average_epps_mean, average_epps_value, m) = generate_epps_plots_values(Data)
+
+p4_x = plot(dt, average_epps_mean, legend = false,dpi=300, ribbon=(q .* std(average_epps_value, dims = 2) * 0.001), fillalpha=.15, title="Δt=0.03 Δx=1/2")
+
+xlabel!(p4_x, L"\Delta t\textrm{[sec]}")
+ylabel!(p4_x, L"\rho_{\Delta t}^{ij}")
+
+savefig(p4_x, "Plots/Epps/Epps_delta_x_1_over_2.png")
