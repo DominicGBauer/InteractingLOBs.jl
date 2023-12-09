@@ -46,22 +46,22 @@ r = 0.5 #proportion of time in which it jumps left or right
 β = 0.0 #probability of being the value of the previous lag or mean reversion strength
 lag = 10 #lag
 do_random_walk = false #behave like a random walk
-myRandomnessTerm = RandomnessTerm(σ,r,β,lag,do_random_walk,true)
+myRandomnessTerm = RandomnessTerm(σ, r, β, lag, do_random_walk, true)
 
 
 Δx = L / M  # real gap between simulation points
-Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
+Δt = (r * (Δx^2) / (2.0 * D))^(1 / γ)
 
 # RL Stuff:
 RealStartTime = 50 # when, in real time, to kick the system
-SimStartTime = to_simulation_time(RealStartTime,Δt)-2 # convert to simulation time
+SimStartTime = to_simulation_time(RealStartTime, Δt) - 2 # convert to simulation time
 SimEndTime = SimStartTime + 3 # when to stop kicking, in simulation time
 Position = 200
 Volume = -8; # If position == -x where x>=0, then put it x above the mid price each time
 
-myRLPusher1 = RLPushTerm(SimStartTime,SimEndTime,Position,Volume,true)
+myRLPusher1 = RLPushTerm(SimStartTime, SimEndTime, Position, Volume, true)
 
-myRLPusher2 = RLPushTerm(SimStartTime,SimEndTime,Position,Volume,false)
+myRLPusher2 = RLPushTerm(SimStartTime, SimEndTime, Position, Volume, false)
 
 lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
     mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
@@ -80,7 +80,7 @@ lob_model¹.SK_DP
 r = to_real_time(14401, lob_model¹.Δt)  #r is the time in real time
 s = to_simulation_time(r, lob_model¹.Δt)  #s is the time in real time
 
-Data = InteractOrderBooks([lob_model¹,lob_model²], -1, true);
+Data = InteractOrderBooks([lob_model¹, lob_model²], -1, true);
 path1 = Data[1][1].raw_price_paths[1:s]
 path2 = Data[1][2].raw_price_paths[1:s]
 index_vector = 0:1.0:(size(path2)[1]-1)
@@ -98,12 +98,12 @@ epps = ComputedResults["epps"]
 # Plots
 dt = collect(1:1:400)
 m = size(epps_data)[1]
-q = quantile.(TDist(m-1), [0.975])
+q = quantile.(TDist(m - 1), [0.975])
 
-p1 = plot(dt, mean(epps[1], dims=2), legend = false,dpi=300)
+p1 = plot(dt, mean(epps[1], dims=2), legend=false, dpi=300)
 # plot!(p1, dt, mean(epps[2], dims=2), ribbon=(q .* std(epps[2], dims = 2)), fillalpha=.15, color = :blue, line=(1, [:solid]), label = L"\textrm{Flat trade correction}", marker=([:x :d],1,0,stroke(2,:blue)))
 # plot!(p1, dt, mean(epps[3], dims=2), ribbon=(q .* std(epps[3], dims = 2)), fillalpha=.15, color = :green, line=(1, [:solid]), label = L"\textrm{Overlap correction}", marker=([:circle :d],1,0,stroke(2,:green)))
-# hline!(p1, [mean(epps[4])], ribbon=(q .* std(epps[4], dims = 1)), fillalpha=.15, color = :brown, line=(1, [:dash]), label = L"\textrm{HY}")
+# hline!(p1, [mean(epps[4])], ribbon=(q .* std(epps[4], dims = 1)), fillalpha=.15, color = :brown, line=(1, [:dash]))
 xlabel!(p1, L"\Delta t\textrm{[sec]}")
 ylabel!(p1, L"\rho_{\Delta t}^{ij}")
 

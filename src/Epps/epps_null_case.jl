@@ -4,20 +4,20 @@ include("./epps.jl")
 include("../setup_variables.jl")
 
 function coupling_inner1(x, p¹, p²)
-    f(y)=-(μ*(y))*exp(-(μ*(y))^2) #y is a temporary variable
-    g = 1+tanh(abs(p²-p¹)/a)*c
+    f(y) = -(μ * (y)) * exp(-(μ * (y))^2) #y is a temporary variable
+    g = 1 + tanh(abs(p² - p¹) / a) * c
 
-    if (p²>p¹)
-        if x>p¹
-            return b* f(1/g*(x-p¹))
+    if (p² > p¹)
+        if x > p¹
+            return b * f(1 / g * (x - p¹))
         else
-            return b* g*f(x-p¹)
+            return b * g * f(x - p¹)
         end
     else
-        if x<p¹
-            return b* f(1/g*(x-p¹))
+        if x < p¹
+            return b * f(1 / g * (x - p¹))
         else
-            return b* g*f(x-p¹)
+            return b * g * f(x - p¹)
         end
     end
 end
@@ -52,7 +52,7 @@ coupling_inner_W2 = coupling_inner_W2 .+ abs(minimum(coupling_inner_W2)) .+ 0.00
 
 index_vector = 0:1.0:(size(W1)[1]-1)
 
-epps_data_random_walk = hcat(index_vector, coupling_inner_W1 , coupling_inner_W2)
+epps_data_random_walk = hcat(index_vector, coupling_inner_W1, coupling_inner_W2)
 epps_random_walk = Empirical(epps_data_random_walk)
 
 # # Save and Load
@@ -67,7 +67,7 @@ epps_random_walk = ComputedResults["epps"]
 # # # q = quantile.(TDist(m-1), [0.975])
 
 epps_mean_random_walk = mean(epps_random_walk[1], dims=2)
-p1 = plot(1:size(epps_mean_random_walk)[1], epps_mean_random_walk, legend = false,dpi=300, fillalpha=.15)
+p1 = plot(1:size(epps_mean_random_walk)[1], epps_mean_random_walk, legend=false, dpi=300, fillalpha=0.15)
 
 # # # p1 = plot(dt, epps_mean, legend = :bottomright,dpi=300, label = L"\textrm{Measured}", ribbon=(movingaverage * 0.05))
 # # # plot!(movingaverage_upper, color=:red, label = L"\textrm{LOL}")
@@ -75,7 +75,7 @@ p1 = plot(1:size(epps_mean_random_walk)[1], epps_mean_random_walk, legend = fals
 # # # p1 = plot(dt, mean(SBKFSR[1], dims=2), ribbon=(q .* std(SBKFSR[1], dims = 2)), fillalpha=.15, legend = :topright, color = :red, line=(1, [:solid]), label = L"\textrm{Measured}", marker=([:+ :d],1,0,stroke(2,:red)), dpi = 300, ylims = (-0.1, 1.55))
 # # # plot!(p1, dt, mean(epps[2], dims=2), ribbon=(q .* std(epps[2], dims = 2)), fillalpha=.15, color = :blue, line=(1, [:solid]), label = L"\textrm{Flat trade correction}", marker=([:x :d],1,0,stroke(2,:blue)))
 # # # plot!(p1, dt, mean(epps[3], dims=2), ribbon=(q .* std(epps[3], dims = 2)), fillalpha=.15, color = :green, line=(1, [:solid]), label = L"\textrm{Overlap correction}", marker=([:circle :d],1,0,stroke(2,:green)))
-# # # hline!(p1, [mean(epps[4])], ribbon=(q .* std(epps[4], dims = 1)), fillalpha=.15, color = :brown, line=(1, [:dash]), label = L"\textrm{HY}")
+# # # hline!(p1, [mean(epps[4])], ribbon=(q .* std(epps[4], dims = 1)), fillalpha=.15, color = :brown, line=(1, [:dash]))
 xlabel!(p1, L"\Delta t\textrm{[sec]}")
 ylabel!(p1, L"\rho_{\Delta t}^{ij}")
 ylims!(-0.01, 0.01)
