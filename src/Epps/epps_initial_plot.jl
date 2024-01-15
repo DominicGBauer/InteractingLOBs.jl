@@ -1,8 +1,4 @@
-# L = 300
-# M = 400
-# Δx = 0.75
-
-using InteractingLOBs
+using InteractingLOBs, LaTeXStrings
 
 include("../setup.jl")
 include("./epps.jl")
@@ -11,7 +7,7 @@ include("./generate_plot.jl")
 
 num_paths = 10#30
 
-L = 300     # real system width (e.g. 200 meters)
+L = 200     # real system width (e.g. 200 meters)
 M = 400     # divided into M pieces , 400
 
 T = 2000  # simulation runs until real time T (e.g. 80 seconds)
@@ -47,7 +43,7 @@ myRandomnessTerm = RandomnessTerm(σ, r, β, lag, do_random_walk, true)
 
 
 Δx = L / M  # real gap between simulation points
-Δt = 0.1
+Δt = (r * (Δx^2) / (2.0 * D))^(1 / γ)
 
 # RL Stuff:
 RealStartTime = 50 # when, in real time, to kick the system
@@ -66,12 +62,12 @@ lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
 lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
     mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);
 
-r = to_real_time(7113, lob_model¹.Δt)  #r is the time in real time
+r = to_real_time(14401, lob_model¹.Δt)  #r is the time in real time
 s = to_simulation_time(r, lob_model¹.Δt)  #s is the time in real time
 
 Data = InteractOrderBooks([lob_model¹, lob_model²], -1, true);
 
 (average_epps_mean, average_epps_value, m) = generate_epps_plots_values(Data)
 (power_spectrum, frequencies) = generate_power_spectrum(average_epps_mean)
-p3_x = generate_epps_plot(m, frequencies, power_spectrum, average_epps_mean, "Δt=0.1 Δx=0.75")
-savefig(p3_x, "Plots/Epps/Epps_delta_x_3_over_4.png")
+p1_x = generate_epps_plot_bottom_inset(m, frequencies, power_spectrum, average_epps_mean)
+savefig(p1_x, "Plots/Epps/Epps_Initial.png")

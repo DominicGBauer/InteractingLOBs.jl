@@ -72,35 +72,7 @@ Data = InteractOrderBooks([lob_model¹, lob_model²], -1, true);
 index_vector = 0:1.0:(size(Data[1][1].raw_price_paths[1:s])[1]-1)
 
 
-function generate_epps_plots_values(simulation_data)
-    epps_value = [zeros(M, 1) for i = 1:num_paths]
-    epps_mean = [zeros(M, 1) for i = 1:num_paths]
-    total_epps_mean = zeros(size(epps_mean[1])[1])
-    total_epps_value = zeros(size(epps_value[1])[1])
-    m = 0
 
-    for i in 1:num_paths
-        path1 = simulation_data[i][1].raw_price_paths[1:s]
-        path2 = simulation_data[i][2].raw_price_paths[1:s]
-        index_vector = 0:1.0:(size(simulation_data[i][2].raw_price_paths[1:s])[1]-1)
-        epps_data = hcat(index_vector, path1, path2)
-        epps = Empirical(epps_data)
-        m = size(epps_data)[1]
-        # Save and Load
-        # save("Computed Data/EppsCorrection/Empirical$i.jld", "epps$i", epps[i])
-        # ComputedResults = load("Computed Data/EppsCorrection/Empirical$i.jld")
-        # epps_result = ComputedResults["epps$i"]
-        epps_value[i] = epps[1]
-        epps_mean[i] = mean(epps[1], dims=2)
-        total_epps_mean = total_epps_mean .+ epps_mean[i]
-        total_epps_value = total_epps_value .+ epps_value[i]
-    end
-
-    average_epps_mean = total_epps_mean ./ num_paths
-    average_epps_value = total_epps_value ./ num_paths
-
-    return (average_epps_mean, average_epps_value, m)
-end
 
 # (average_epps_mean, average_epps_value, m) = generate_epps_plots_values(Data)
 
@@ -167,5 +139,3 @@ end
 # hline!(p1, [mean(epps[4])], ribbon=(q .* std(epps[4], dims = 1)), fillalpha=.15, color = :brown, line=(1, [:dash]))
 # xlabel!(p1, L"\Delta t\textrm{[sec]}")
 # ylabel!(p1, L"\rho_{\Delta t}^{ij}")
-
-# savefig(p1, "Plots/Epps/Epps.png")

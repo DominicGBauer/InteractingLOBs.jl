@@ -1,28 +1,31 @@
-# L = 300
-# M = 400
-# Δx = 0.75
-
 using InteractingLOBs
 
-include("../setup.jl")
-include("./epps.jl")
-include("./generate_power_spectrum.jl")
-include("./generate_plot.jl")
+# 400.0
+# 200.0
+#   0.26547709986222817
+#   12.553959522515485
+#   0.5708687099296322
+
+include("../Epps/epps.jl")
+include("../Epps/generate_power_spectrum.jl")
+include("../Epps/generate_plot.jl")
+include("../StylizedFacts/plot_stylized_facts.jl")
+
 
 num_paths = 10#30
 
-L = 300     # real system width (e.g. 200 meters)
-M = 400     # divided into M pieces , 400
+L = 200     # real system width (e.g. 200 meters)
+M = 400    # divided into M pieces , 400
 
 T = 2000  # simulation runs until real time T (e.g. 80 seconds)
 p₀ = 230.0  #this is the mid_price at t=0  238.75
 
 # Free-Parameters for gaussian version
-D = 0.5 # real diffusion constant e.g. D=1 (meters^2 / second), 1
+D = 0.27 # real diffusion constant e.g. D=1 (meters^2 / second), 1
 α = 0.0 # legacy, no longer used
 
-ν = 14.0 #removal rate
-γ = 1.0 #fraction of derivative (1 is normal diffusion, less than 1 is D^{1-γ} derivative on the RHS)
+ν = 12.55 #removal rate
+γ = 0.57 #fraction of derivative (1 is normal diffusion, less than 1 is D^{1-γ} derivative on the RHS)
 
 # Source term:
 λ = 1.0 #
@@ -47,7 +50,7 @@ myRandomnessTerm = RandomnessTerm(σ, r, β, lag, do_random_walk, true)
 
 
 Δx = L / M  # real gap between simulation points
-Δt = 0.1
+Δt = (r * (Δx^2) / (2.0 * D))^(1 / γ)
 
 # RL Stuff:
 RealStartTime = 50 # when, in real time, to kick the system
@@ -66,12 +69,20 @@ lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
 lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
     mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);
 
-r = to_real_time(7113, lob_model¹.Δt)  #r is the time in real time
+r = to_real_time(14401, lob_model¹.Δt)  #r is the time in real time
 s = to_simulation_time(r, lob_model¹.Δt)  #s is the time in real time
 
 Data = InteractOrderBooks([lob_model¹, lob_model²], -1, true);
 
 (average_epps_mean, average_epps_value, m) = generate_epps_plots_values(Data)
 (power_spectrum, frequencies) = generate_power_spectrum(average_epps_mean)
-p3_x = generate_epps_plot(m, frequencies, power_spectrum, average_epps_mean, "Δt=0.1 Δx=0.75")
-savefig(p3_x, "Plots/Epps/Epps_delta_x_3_over_4.png")
+p1 = generate_epps_plot_bottom_inset(m, frequencies, power_spectrum, average_epps_mean)
+savefig(p1, "Plots/Epps/Epps_Estimated.png")
+
+data_stylized_facts = StylizedFactsPlot(Data[1][1].raw_price_paths[1:s]);
+
+(acf, hist_qq, price_returns) = plot_all_stylized_facts(data_stylized_facts)
+
+savefig(acf, "Plots/StylizedFacts/Estimated_ACF")
+savefig(hist_qq, "Plots/StylizedFacts/Estimated_Hist_QQ")
+savefig(price_returns, "Plots/StylizedFacts/Estimated_Price_Returns")

@@ -6,9 +6,9 @@ using InteractingLOBs
 
 include("../setup.jl")
 include("./epps.jl")
-include("./epps_plot.jl")
+include("./generate_plot.jl")
 
-num_paths = 5#30
+num_paths = 10#30
 
 L = 200     # real system width (e.g. 200 meters)
 M = 400     # divided into M pieces , 400
@@ -65,12 +65,6 @@ lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
 lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
   mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);
 
-# total_steps = 10
-# total_length = to_simulation_time(T,Δt)
-# step = floor(Int,total_length/total_steps)
-
-# range = 1:step:(total_length-step)
-
 r = to_real_time(14401, lob_model¹.Δt)  #r is the time in real time
 s = to_simulation_time(r, lob_model¹.Δt)  #s is the time in real time
 
@@ -118,21 +112,10 @@ lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
 lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
   mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);
 Data5 = InteractOrderBooks([lob_model¹, lob_model²], -1, true);
-# path1 = Data[1][1].raw_price_paths[1:s]
-# path2 = Data[1][2].raw_price_paths[1:s]
-# index_vector = 0:1.0:(size(path2)[1]-1)
-# epps_data = hcat(index_vector, path1, path2)
 
-# # uncomment to rerun
-# epps_1 = Empirical(epps_data)
-# save("Computed Data/EppsCorrection/Empirical_delta_x_1_over_4.png.jld", "epps", epps_1)
-
-# ComputedResults = load("Computed Data/EppsCorrection/Empirical_delta_x_1_over_4.png.jld")
-# epps_1 = ComputedResults["epps"]
 
 # Plots
 dt = collect(1:1:400)
-# m = size(epps_data)[1]
 
 (average_epps_mean, average_epps_value, m) = generate_epps_plots_values(Data)
 (average_epps_mean1, average_epps_value1, m) = generate_epps_plots_values(Data1)
