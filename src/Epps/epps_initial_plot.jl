@@ -15,7 +15,6 @@ p₀ = 230.0  #this is the mid_price at t=0  238.75
 
 # Free-Parameters for gaussian version
 D = 0.5 # real diffusion constant e.g. D=1 (meters^2 / second), 1
-α = 0.0 # legacy, no longer used
 
 ν = 14.0 #removal rate
 γ = 1.0 #fraction of derivative (1 is normal diffusion, less than 1 is D^{1-γ} derivative on the RHS)
@@ -56,11 +55,17 @@ myRLPusher1 = RLPushTerm(SimStartTime, SimEndTime, Position, Volume, true)
 
 myRLPusher2 = RLPushTerm(SimStartTime, SimEndTime, Position, Volume, false)
 
-lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
-    mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
+lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
+  mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm, do_exp_dist_times=false);
 
-lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
-    mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);
+lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
+  mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm, do_exp_dist_times=false);
+
+lob_model¹_with_exp = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
+  mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm, do_exp_dist_times=true);
+
+lob_model²_with_exp = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
+  mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm, do_exp_dist_times=true);
 
 r = to_real_time(14401, lob_model¹.Δt)  #r is the time in real time
 s = to_simulation_time(r, lob_model¹.Δt)  #s is the time in real time
@@ -70,4 +75,10 @@ Data = InteractOrderBooks([lob_model¹, lob_model²], -1, true);
 (average_epps_mean, average_epps_value, m) = generate_epps_plots_values(Data)
 (power_spectrum, frequencies) = generate_power_spectrum(average_epps_mean)
 p1_x = generate_epps_plot_bottom_inset(m, frequencies, power_spectrum, average_epps_mean)
-savefig(p1_x, "Plots/Epps/Epps_Initial.png")
+savefig(p1_x, "Plots/Epps/Epps_Initial_no_exp.png")
+
+Data_with_exp = InteractOrderBooks([lob_model¹_with_exp, lob_model²_with_exp], -1, true);
+(average_epps_mean_with_exp, average_epps_value_with_exp, m) = generate_epps_plots_values(Data_with_exp)
+(power_spectrum_with_exp, frequencies_with_exp) = generate_power_spectrum(average_epps_mean_with_exp)
+p1_x_with_exp = generate_epps_plot_bottom_inset(m, frequencies_with_exp, power_spectrum_with_exp, average_epps_mean_with_exp)
+savefig(p1_x_with_exp, "Plots/Epps/Epps_Initial.png")

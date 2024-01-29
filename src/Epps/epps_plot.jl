@@ -12,7 +12,6 @@ p₀ = 230.0  #this is the mid_price at t=0  238.75
 
 # Free-Parameters for gaussian version
 D = 0.5 # real diffusion constant e.g. D=1 (meters^2 / second), 1
-α = 0.0 # legacy, no longer used
 
 ν = 14.0 #removal rate
 γ = 1.0 #fraction of derivative (1 is normal diffusion, less than 1 is D^{1-γ} derivative on the RHS)
@@ -53,10 +52,10 @@ myRLPusher1 = RLPushTerm(SimStartTime, SimEndTime, Position, Volume, true)
 
 myRLPusher2 = RLPushTerm(SimStartTime, SimEndTime, Position, Volume, false)
 
-lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
+lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
     mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
 
-lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
+lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
     mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);
 
 # total_steps = 10

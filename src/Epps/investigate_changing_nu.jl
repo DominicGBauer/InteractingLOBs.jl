@@ -1,7 +1,3 @@
-# L = 100
-# M = 400
-# Δx = 0.375
-
 using InteractingLOBs
 
 include("../setup.jl")
@@ -18,7 +14,6 @@ p₀ = 230.0  #this is the mid_price at t=0  238.75
 
 # Free-Parameters for gaussian version
 D = 0.5 # real diffusion constant e.g. D=1 (meters^2 / second), 1
-α = 0.0 # legacy, no longer used
 
 ν = 3.0 #removal rate
 γ = 1.0 #fraction of derivative (1 is normal diffusion, less than 1 is D^{1-γ} derivative on the RHS)
@@ -59,11 +54,14 @@ myRLPusher1 = RLPushTerm(SimStartTime, SimEndTime, Position, Volume, true)
 
 myRLPusher2 = RLPushTerm(SimStartTime, SimEndTime, Position, Volume, false)
 
-lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
-  mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
 
-lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
-  mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);
+ν = 1.0
+
+lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
+  mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm, do_exp_dist_times=false);
+
+lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
+  mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm, do_exp_dist_times=false);
 
 r = to_real_time(14401, lob_model¹.Δt)  #r is the time in real time
 s = to_simulation_time(r, lob_model¹.Δt)  #s is the time in real time
@@ -71,46 +69,46 @@ s = to_simulation_time(r, lob_model¹.Δt)  #s is the time in real time
 Data = InteractOrderBooks([lob_model¹, lob_model²], -1, true);
 
 
-ν = 5.0
-lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
-  mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
+ν = 4.0
+lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
+  mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm, do_exp_dist_times=false);
 
-lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
-  mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);
+lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
+  mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm, do_exp_dist_times=false);
 
 
 Data1 = InteractOrderBooks([lob_model¹, lob_model²], -1, true);
 
-ν = 8.0
-lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
-  mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
+ν = 7.0
+lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
+  mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm, do_exp_dist_times=false);
 
-lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
-  mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);
+lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
+  mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm, do_exp_dist_times=false);
 Data2 = InteractOrderBooks([lob_model¹, lob_model²], -1, true);
 
-ν = 12.0
-lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
-  mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
+ν = 10.0
+lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
+  mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm, do_exp_dist_times=false);
 
-lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
-  mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);
+lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
+  mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm, do_exp_dist_times=false);
 Data3 = InteractOrderBooks([lob_model¹, lob_model²], -1, true);
 
-ν = 15.0
-lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
+ν = 13.0
+lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
   mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
 
-lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
-  mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);
+lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
+  mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm, do_exp_dist_times=false);
 Data4 = InteractOrderBooks([lob_model¹, lob_model²], -1, true);
 
-ν = 18.0
-lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
-  mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
+ν = 16.0
+lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
+  mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm, do_exp_dist_times=false);
 
-lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
-  mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);
+lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
+  mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm, do_exp_dist_times=false);
 Data5 = InteractOrderBooks([lob_model¹, lob_model²], -1, true);
 
 
@@ -125,14 +123,14 @@ dt = collect(1:1:400)
 (average_epps_mean5, average_epps_value5, m) = generate_epps_plots_values(Data5)
 q = quantile.(TDist(m - 1), [0.975])
 
-p1_x = plot(dt, average_epps_mean, dpi=300, fillalpha=0.15, label="ν=3")
-plot!(dt, average_epps_mean1, dpi=300, fillalpha=0.15, label="ν=6")
-plot!(dt, average_epps_mean2, dpi=300, fillalpha=0.15, label="ν=9")
-plot!(dt, average_epps_mean3, dpi=300, fillalpha=0.15, label="ν=12")
-plot!(dt, average_epps_mean4, dpi=300, fillalpha=0.15, label="ν=15")
-plot!(dt, average_epps_mean5, dpi=300, fillalpha=0.15, label="ν=18")
+p1_x = plot(dt, average_epps_mean, dpi=300, fillalpha=0.15, label="ν=1")
+plot!(dt, average_epps_mean1, dpi=300, fillalpha=0.15, label="ν=4")
+plot!(dt, average_epps_mean2, dpi=300, fillalpha=0.15, label="ν=7")
+plot!(dt, average_epps_mean3, dpi=300, fillalpha=0.15, label="ν=10")
+plot!(dt, average_epps_mean4, dpi=300, fillalpha=0.15, label="ν=13")
+plot!(dt, average_epps_mean5, dpi=300, fillalpha=0.15, label="ν=16")
 
 xlabel!(p1_x, L"\Delta t\textrm{[sec]}")
 ylabel!(p1_x, L"\rho_{\Delta t}^{ij}")
 
-savefig(p1_x, "Plots/Epps/Chaning_Nu.png")
+savefig(p1_x, "Plots/Epps/Changing_Nu.png")

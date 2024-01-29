@@ -4,6 +4,9 @@ dt = collect(1:1:400)
 
 function generate_epps_plot(m, frequencies, power_spectrum, average_epps_mean, title=false)
   q = quantile.(TDist(m - 1), [0.975])
+  frequencies = convert(Vector, frequencies)
+  inds = (frequencies .> 0) .& (power_spectrum .> 0)
+  inds = vec(inds)
 
   p = plot(dt,
     average_epps_mean,
@@ -18,18 +21,18 @@ function generate_epps_plot(m, frequencies, power_spectrum, average_epps_mean, t
     ribbon=(q .* std(average_epps_value, dims=2) * 0.001),
     fillalpha=0.15,
   )
-  plot!(frequencies,
-    power_spectrum,
+  plot!(frequencies[inds],
+    power_spectrum[inds],
     label=false,
+    dpi=300,
     xlabel="Frequency (Hz)",
     xguidefontsize=6,
     xtickfontsize=6,
-    ylabel="Power",
+    ylabel="Power [x" * L"{10}^{-8}" * "]",
+    yticks=([0, 1 * 10^-8, 2 * 10^-8, 3 * 10^-8], ["0", "1", "2", "3"]),
     yguidefontsize=6,
     ytickfontsize=6,
-    xlims=[0, 3 * 10^-5],
-    xticks=([3 * 10^-5]),
-    ylims=[0, 1.5 * 10^-7],
+    xscale=:log10,
     legend=false,
     inset=(1, bbox(0.15, 0, 0.3, 0.3, :top, :left)),
     subplot=2
@@ -38,8 +41,11 @@ function generate_epps_plot(m, frequencies, power_spectrum, average_epps_mean, t
   return p
 end
 
-function generate_epps_plot_bottom_inset(m, frequencies, power_spectrum, average_epps_mean)
+function generate_epps_plot_bottom_inset(m, frequencies, power_spectrum, average_epps_mean; yticks=([0, 1 * 10^-8, 2 * 10^-8], ["0", "1", "2"]))
   q = quantile.(TDist(m - 1), [0.975])
+  frequencies = convert(Vector, frequencies)
+  inds = (frequencies .> 0) .& (power_spectrum .> 0)
+  inds = vec(inds)
 
   p = plot(dt,
     average_epps_mean,
@@ -48,26 +54,26 @@ function generate_epps_plot_bottom_inset(m, frequencies, power_spectrum, average
     xlims=[0, Inf],
     xticks=([0, 100, 200, 300, 400]),
     xlabel=L"\Delta t\textrm{[sec]}",
-    ylims=[0, 8 * 10^-5],
-    yticks=([4 * 10^-5, 8 * 10^-5]),
+    # ylims=[0, 8 * 10^-5],
+    # yticks=([4 * 10^-5, 8 * 10^-5]),
     ylabel=L"\rho_{\Delta t}^{ij}",
     ribbon=(q .* std(average_epps_value, dims=2) * 0.001),
     fillalpha=0.15,
   )
-  plot!(frequencies,
-    power_spectrum,
+  plot!(frequencies[inds],
+    power_spectrum[inds],
     label=false,
+    dpi=300,
     xlabel="Frequency (Hz)",
     xguidefontsize=6,
     xtickfontsize=6,
-    ylabel="Power",
+    ylabel="Power [x" * L"{10}^{-8}" * "]",
+    yticks=yticks,
     yguidefontsize=6,
     ytickfontsize=6,
-    xlims=[0, 3 * 10^-5],
-    xticks=([3 * 10^-5]),
-    ylims=[0, 1.75 * 10^-7],
+    xscale=:log10,
     legend=false,
-    inset=(1, bbox(0.05, 0.1, 0.3, 0.3, :bottom, :right)),
+    inset=(1, bbox(0, 0.1, 0.3, 0.3, :bottom, :right)),
     subplot=2
   )
 

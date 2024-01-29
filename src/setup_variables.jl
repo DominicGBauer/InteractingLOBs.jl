@@ -10,7 +10,6 @@ p₀ = 230.0  #this is the mid_price at t=0  238.75
 
 # Free-Parameters for gaussian version
 D = 0.5 # real diffusion constant e.g. D=1 (meters^2 / second), 1
-α = 0.0 # legacy, no longer used
 
 ν = 14.0 #removal rate
 γ = 1.0 #fraction of derivative (1 is normal diffusion, less than 1 is D^{1-γ} derivative on the RHS)
@@ -34,21 +33,21 @@ r = 0.5 #proportion of time in which it jumps left or right
 β = 0.0 #probability of being the value of the previous lag or mean reversion strength
 lag = 10 #lag
 do_random_walk = false #behave like a random walk
-myRandomnessTerm = RandomnessTerm(σ,r,β,lag,do_random_walk,true)
+myRandomnessTerm = RandomnessTerm(σ, r, β, lag, do_random_walk, true)
 
 
 Δx = L / M  # real gap between simulation points
-Δt = (r * (Δx^2) / (2.0 * D))^(1/γ)
+Δt = (r * (Δx^2) / (2.0 * D))^(1 / γ)
 
 # RL Stuff:
 RealStartTime = 50 # when, in real time, to kick the system
-SimStartTime = to_simulation_time(RealStartTime,Δt)-2 # convert to simulation time
+SimStartTime = to_simulation_time(RealStartTime, Δt) - 2 # convert to simulation time
 SimEndTime = SimStartTime + 3 # when to stop kicking, in simulation time
 Position = 200
 Volume = -8; # If position == -x where x>=0, then put it x above the mid price each time
 
-myRLPusher1 = RLPushTerm(SimStartTime,SimEndTime,Position,Volume,true)
-myRLPusher2 = RLPushTerm(SimStartTime,SimEndTime,Position,Volume,false)
+myRLPusher1 = RLPushTerm(SimStartTime, SimEndTime, Position, Volume, true)
+myRLPusher2 = RLPushTerm(SimStartTime, SimEndTime, Position, Volume, false)
 
-lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ, mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
-lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ, mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);
+lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, γ, mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
+lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, γ, mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);

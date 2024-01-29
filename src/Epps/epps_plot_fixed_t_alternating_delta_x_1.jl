@@ -20,7 +20,6 @@ p₀ = 230.0  #this is the mid_price at t=0  238.75
 
 # Free-Parameters for gaussian version
 D = 0.5 # real diffusion constant e.g. D=1 (meters^2 / second), 1
-α = 0.0 # legacy, no longer used
 
 ν = 14.0 #removal rate
 γ = 1.0 #fraction of derivative (1 is normal diffusion, less than 1 is D^{1-γ} derivative on the RHS)
@@ -61,11 +60,11 @@ myRLPusher1 = RLPushTerm(SimStartTime, SimEndTime, Position, Volume, true)
 
 myRLPusher2 = RLPushTerm(SimStartTime, SimEndTime, Position, Volume, false)
 
-lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
-    mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm);
+lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
+    mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm, do_exp_dist_times=false);
 
-lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, α, γ,
-    mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm);
+lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
+    mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm, do_exp_dist_times=false);
 
 r = to_real_time(14401, lob_model¹.Δt)  #r is the time in real time
 s = to_simulation_time(r, lob_model¹.Δt)  #s is the time in real time
@@ -73,6 +72,7 @@ s = to_simulation_time(r, lob_model¹.Δt)  #s is the time in real time
 Data = InteractOrderBooks([lob_model¹, lob_model²], -1, true);
 
 (average_epps_mean, average_epps_value, m) = generate_epps_plots_values(Data)
+
 (power_spectrum, frequencies) = generate_power_spectrum(average_epps_mean)
-p1_x = generate_epps_plot(m, frequencies, power_spectrum, average_epps_mean, "Δt=0.1 Δx=0.25")
+p1_x = generate_epps_plot_bottom_inset(m, frequencies, power_spectrum, average_epps_mean; yticks=([0, 1 * 10^-8, 1.5 * 10^-8], ["0", "1", "1.5"]))
 savefig(p1_x, "Plots/Epps/Epps_delta_x_1_over_4.png")

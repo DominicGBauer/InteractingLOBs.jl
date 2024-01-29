@@ -70,3 +70,4 @@ archive/
 *.svg
 
 .vscode
+.DS_Store

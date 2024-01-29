@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 mutable struct DataPasser
     slob::Any
-    lob_densities::Array{Float64,2}
-    sources::Array{Float64,2}
-    couplings::Array{Float64,2}
-    rl_pushes::Array{Float64,2}
-    raw_price_paths::Array{Float64,1}
-    obs_price_paths::Array{Float64,1}
-    P⁺s::Array{Float64,1}
-    P⁻s::Array{Float64,1}
-    Ps::Array{Float64,1}
-    V::Array{Float64,1}
+    lob_densities::Matrix{Float64}
+    lob_densities_L::Matrix{Float64}
+    lob_densities_R::Matrix{Float64}
+    sources::Matrix{Float64}
+    couplings::Matrix{Float64}
+    rl_pushes::Matrix{Float64}
+    raw_price_paths::Vector{Float64}
+    obs_price_paths::Vector{Float64}
+    P⁺s::Vector{Float64}
+    P⁻s::Vector{Float64}
+    Ps::Vector{Float64}
+    V::Vector{Float64}
+    x_shifts::Vector{Float64}
 end
