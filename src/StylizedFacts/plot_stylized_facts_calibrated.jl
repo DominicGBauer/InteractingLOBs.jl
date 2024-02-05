@@ -2,7 +2,7 @@ using InteractingLOBs
 
 include("plot_stylized_facts.jl")
 
-num_paths = 5#30
+num_paths = 1#30
 
 L = 200     # real system width (e.g. 200 meters)
 M = 400     # divided into M pieces , 400
@@ -13,7 +13,7 @@ p₀ = 230.0  #this is the mid_price at t=0  238.75
 # Free-Parameters for gaussian version
 D = 0.27 # real diffusion constant e.g. D=1 (meters^2 / second), 1
 
-ν = 1.00 #removal rate
+ν = 12.55 #removal rate
 γ = 0.57 #fraction of derivative (1 is normal diffusion, less than 1 is D^{1-γ} derivative on the RHS)
 
 # Source term:
@@ -53,20 +53,20 @@ myRLPusher1 = RLPushTerm(SimStartTime, SimEndTime, Position, Volume, true)
 myRLPusher2 = RLPushTerm(SimStartTime, SimEndTime, Position, Volume, false)
 
 lob_model¹ = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
-    mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm, do_exp_dist_times=true);
+    mySourceTerm, myCouplingTerm, myRLPusher1, myRandomnessTerm, do_exp_dist_times=false);
 
 lob_model² = SLOB(num_paths, T, p₀, M, L, D, ν, γ,
-    mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm, do_exp_dist_times=true);
+    mySourceTerm, myCouplingTerm, myRLPusher2, myRandomnessTerm, do_exp_dist_times=false);
 
 r = to_real_time(14401, lob_model¹.Δt)  #r is the time in real time
 s = to_simulation_time(r, lob_model¹.Δt)  #s is the time in real time
 
-Data_cal = InteractOrderBooks([lob_model¹, lob_model²], -1, true);
+Data_est = InteractOrderBooks([lob_model¹, lob_model²], -1, true);
 
-data_stylized_facts = StylizedFactsPlot(Data_cal[1][1].raw_price_paths[1:s]);
+data_stylized_facts = StylizedFactsPlot([Data_est[1][1].raw_price_paths[1:s]]);
 
 (acf, hist_qq, price_returns) = plot_all_stylized_facts(data_stylized_facts)
 
-savefig(acf, "Plots/StylizedFacts/Calibrated_ACF")
-savefig(hist_qq, "Plots/StylizedFacts/Calibrated_Hist_QQ")
-savefig(price_returns, "Plots/StylizedFacts/Calibrated_Price_Returns")
+savefig(acf, "Plots/StylizedFacts/Estimated_ACF")
+savefig(hist_qq, "Plots/StylizedFacts/Estimated_Hist_QQ")
+savefig(price_returns, "Plots/StylizedFacts/Estimated_Price_Returns")
