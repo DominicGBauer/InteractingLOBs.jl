@@ -1,6 +1,6 @@
 name = "InteractingLOBs"
 uuid = "1931dee9-8ecc-45e4-adec-8e58a11a0d04"
-authors = ["derickdiana <derick.diana.dd@gmail.com>"]
+authors = ["dominicbauer <dominicguntherbauer@hotmail.com>"]
 version = "0.1.0"
 
 [deps]
